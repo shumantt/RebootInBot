@@ -25,7 +25,11 @@ let parseIncomingCommand (message:Message) =
         let parseMachineName text command = 
             let (|Command|_|) (p:string) (s:string) =
                 if s.StartsWith(p) then
-                    Some(s.Substring(p.Length))
+                    let machineName = s.Substring(p.Length).Trim() 
+                    if machineName.Length > 0 then
+                        Some machineName
+                    else
+                        None
                 else
                     None
             match text with
