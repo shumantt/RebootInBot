@@ -12,9 +12,11 @@ let parseIncomingCommand (message:Message) =
           Source = CommandSource.Telegram
           Data = { FromUser = message.From.Value.Username
                    MachineName = machineName } }
+   
     let firstBotCommand (entities: seq<MessageEntity>) =
         entities
         |> Seq.tryFind(fun x -> x.Type.Equals botCommandType)
+    
     let parseCommand (commandEntity:MessageEntity) =
         let parseCommandType (command:string) =
             match command with
@@ -22,6 +24,7 @@ let parseIncomingCommand (message:Message) =
             | "/cancel" -> Some IncomingCommandType.CancelTimer
             | "/exclude" -> Some IncomingCommandType.ExcludeMember
             | _ -> None
+        
         let parseMachineName text command = 
             let (|Command|_|) (p:string) (s:string) =
                 if s.StartsWith(p) then
@@ -35,10 +38,12 @@ let parseIncomingCommand (message:Message) =
             match text with
             | Command command machineName -> Some machineName
             | _ -> None
+        
         let getCommandText offset length =
             let offsetParam = int32(offset)
             let lengthParam = int32(length)
             message.Text.Value.Substring(offsetParam, lengthParam)
+        
         let commandText = getCommandText commandEntity.Offset commandEntity.Length 
         parseCommandType commandText
         |> Option.bind(fun x -> Some (x, (parseMachineName message.Text.Value commandText)))

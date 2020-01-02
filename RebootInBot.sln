@@ -8,6 +8,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RebootInBot.Processing", "R
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RebootInBot.Telegram.Tests", "RebootInBot.Telegram.Tests\RebootInBot.Telegram.Tests.fsproj", "{55ABB6D5-3149-4F45-98F0-7B777488187B}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RebootInBot.Processing.Tests", "RebootInBot.Processing.Tests\RebootInBot.Processing.Tests.fsproj", "{6DF4A94D-2854-4C19-9CD7-101128AB2A41}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{55ABB6D5-3149-4F45-98F0-7B777488187B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{55ABB6D5-3149-4F45-98F0-7B777488187B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{55ABB6D5-3149-4F45-98F0-7B777488187B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6DF4A94D-2854-4C19-9CD7-101128AB2A41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DF4A94D-2854-4C19-9CD7-101128AB2A41}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6DF4A94D-2854-4C19-9CD7-101128AB2A41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6DF4A94D-2854-4C19-9CD7-101128AB2A41}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
