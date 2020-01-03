@@ -14,11 +14,6 @@ type SendCommandType =
 type CommandSource =
 | Telegram
 
-
-type ProcessStateType =
-| Idle
-| Counting
-
 type CommandData = {
     MachineName: string option
     FromUser: string option
@@ -32,11 +27,14 @@ type IncomingCommand = {
 }
 
 [<CLIMutable>]
-type ProcessState = {
-    CurrentState: ProcessStateType
-    Count: int option
-    UserStarted: string option
+type CountingState = {
+    Count: int
+    UserStarted: string
 }
+
+type ProcessState =
+| CountingState of CountingState
+| IdleState of unit
 
 [<CLIMutable>]
 type ProcessConfig = {
