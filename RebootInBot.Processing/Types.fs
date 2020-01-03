@@ -34,7 +34,7 @@ type CountingState = {
 
 type ProcessState =
 | CountingState of CountingState
-| IdleState of unit
+| IdleState
 
 [<CLIMutable>]
 type ProcessConfig = {

@@ -14,7 +14,7 @@ let ``Create and get new process`` () =
     let mutable createdIds = [||]
     try
         let processObj: Process = { Id = 1L
-                                    State = IdleState ()
+                                    State = IdleState
                                     Config = { ExcludeMembers = None } }
         
         createdIds <- [| processObj.Id.ToString() |]
@@ -31,7 +31,7 @@ let ``Update and get process`` () =
     let mutable createdIds = [||]
     try
         let processObj: Process = { Id = 2L
-                                    State = IdleState ()
+                                    State = IdleState
                                     Config = { ExcludeMembers = None } }
         let updatedProcess = { processObj with State = CountingState { Count = 10; UserStarted = "@testUser" };
                                                Config = { ExcludeMembers = Some ([|"excluded"|]) } }
