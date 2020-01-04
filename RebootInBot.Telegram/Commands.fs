@@ -10,7 +10,7 @@ let parseIncomingCommand (message:Message) =
         { ProcessId = message.Chat.Id
           Type = commandType
           Source = CommandSource.Telegram
-          Data = { FromUser = message.From.Value.Username
+          Data = { FromUser = message.From.Value.Username.Value
                    MachineName = machineName } }
    
     let firstBotCommand (entities: seq<MessageEntity>) =
@@ -23,6 +23,7 @@ let parseIncomingCommand (message:Message) =
             | "/reboot" -> Some IncomingCommandType.StartTimer
             | "/cancel" -> Some IncomingCommandType.CancelTimer
             | "/exclude" -> Some IncomingCommandType.ExcludeMember
+            | "/include" -> Some IncomingCommandType.IncludeMember
             | _ -> None
         
         let parseMachineName text command = 

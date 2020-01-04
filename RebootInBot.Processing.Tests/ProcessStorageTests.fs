@@ -15,7 +15,7 @@ let ``Create and get new process`` () =
     try
         let processObj: Process = { Id = 1L
                                     State = IdleState
-                                    Config = { ExcludeMembers = None } }
+                                    Config = { ExcludeMembers = [||] } }
         
         createdIds <- [| processObj.Id.ToString() |]
         createOrUpdateProcess defaultRedisClientFactory processObj |> ignore
@@ -32,9 +32,9 @@ let ``Update and get process`` () =
     try
         let processObj: Process = { Id = 2L
                                     State = IdleState
-                                    Config = { ExcludeMembers = None } }
+                                    Config = { ExcludeMembers = [|  |] } }
         let updatedProcess = { processObj with State = CountingState { Count = 10; UserStarted = "@testUser" };
-                                               Config = { ExcludeMembers = Some ([|"excluded"|]) } }
+                                               Config = { ExcludeMembers = [|"excluded"|] } }
         
         createdIds <- [| processObj.Id.ToString() |]
         createOrUpdateProcess defaultRedisClientFactory processObj |> ignore //create

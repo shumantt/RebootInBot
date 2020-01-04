@@ -44,9 +44,9 @@ let createOrUpdateProcess (redisClientFactory:unit -> RedisClient) (processObj: 
     use client = redisClientFactory()
     let key = processObj.Id.ToString()
     if client.ContainsKey(key) then
-        update client key
+        update client key |> ignore
     else
-        create client key
+        create client key |> ignore
         
 let removeProcess (redisClientFactory:unit -> RedisClient) processId =
     use client = redisClientFactory()    

@@ -63,7 +63,7 @@ let ``Known command with machine param`` (command:string) (expectedType: Incomin
                           Source = Telegram
                           ProcessId = message.Chat.Id
                           Data = { MachineName = Some testMachine
-                                   FromUser = message.From.Value.Username } }
+                                   FromUser = message.From.Value.Username.Value } }
     actual |> should equal expected
 
 [<Theory>]
@@ -81,11 +81,12 @@ let ``Known command without machine param`` (command:string) (expectedType: Inco
                           Source = Telegram
                           ProcessId = message.Chat.Id
                           Data = { MachineName = None
-                                   FromUser = message.From.Value.Username } }
+                                   FromUser = message.From.Value.Username.Value } }
     actual |> should equal expected
   
 let knownCommands =
     let reboot: obj[] = [|"/reboot"; IncomingCommandType.StartTimer|]
     let cancel: obj[] = [|"/cancel"; IncomingCommandType.CancelTimer|]
-    let exclude: obj[] =  [|"/exclude"; IncomingCommandType.ExcludeMember|]
-    [| reboot; cancel; exclude |]
+    let exclude: obj[] = [|"/exclude"; IncomingCommandType.ExcludeMember|]
+    let includeCommand: obj[] = [| "/include"; IncomingCommandType.IncludeMember |]
+    [| reboot; cancel; exclude; includeCommand |]

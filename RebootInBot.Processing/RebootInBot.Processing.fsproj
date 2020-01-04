@@ -6,7 +6,9 @@
 
     <ItemGroup>
         <Compile Include="Types.fs" />
+        <Compile Include="Constants.fs" />
         <Compile Include="ProcessStorage.fs" />
+        <Compile Include="UpdatesHandling.fs" />
     </ItemGroup>
 
     <ItemGroup>
