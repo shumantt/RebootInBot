@@ -16,4 +16,8 @@
       <PackageReference Include="ServiceStack.Redis" Version="5.7.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\RebootInBot.Commands\RebootInBot.Commands.fsproj" />
+    </ItemGroup>
+
 </Project>

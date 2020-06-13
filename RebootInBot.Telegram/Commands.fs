@@ -1,11 +1,13 @@
 module RebootInBot.Telegram.Commands
 open RebootInBot.Telegram.Types
-open RebootInBot.Processing.Types
+open RebootInBot.Commands.Types
 
 [<Literal>]
 let botCommandType = "bot_command"
 
 let parseIncomingCommand (message:Message) =
+    let ignoreCommand = NoAction
+    
     let build machineName commandType =
         { ProcessId = message.Chat.Id
           Type = commandType
@@ -18,6 +20,7 @@ let parseIncomingCommand (message:Message) =
         |> Seq.tryFind(fun x -> x.Type.Equals botCommandType)
     
     let parseCommand (commandEntity:MessageEntity) =
+        
         let parseCommandType (command:string) =
             match command with
             | "/reboot" -> Some IncomingCommandType.StartTimer

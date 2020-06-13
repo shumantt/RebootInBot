@@ -16,7 +16,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\RebootInBot.Processing\RebootInBot.Processing.fsproj" />
+      <ProjectReference Include="..\RebootInBot.Commands\RebootInBot.Commands.fsproj" />
     </ItemGroup>
 
 </Project>

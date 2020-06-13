@@ -1,5 +1,6 @@
 module RebootInBot.Processing.UpdatesHandling
 
+open RebootInBot.Commands.Types
 open RebootInBot.Processing.Types
 
 let private buildDefaultProcess id = { Id = id

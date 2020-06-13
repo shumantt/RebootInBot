@@ -1,6 +1,7 @@
 module RebootInBot.Processing.Tests.UpdatesHandlingTests
 
 open FsUnit
+open RebootInBot.Commands.Types
 open RebootInBot.Processing
 open RebootInBot.Processing.Types
 open RebootInBot.Processing.UpdatesHandling
