@@ -16,8 +16,8 @@ let private buildMentions (toMention:array<string> option) (toExclude:array<stri
             | _ -> Mentions.All
 
 let private handleStartTimer (command:IncomingCommand) getProcess: NewMessage * Process option =
-    let buildAlredyRunningCommand userStarted excludedMetntions =
-        { Mentions = buildMentions (Some [| userStarted |]) (Some excludedMetntions)
+    let buildAlreadyRunningCommand userStarted excludedMentions =
+        { Mentions = buildMentions (Some [| userStarted |]) (Some excludedMentions)
           MessageText = Constants.processAlreadyRunning
           ProcessId = command.ProcessId }
     
@@ -45,7 +45,7 @@ let private handleStartTimer (command:IncomingCommand) getProcess: NewMessage * 
     match proc with
     | Some savedProcess ->
                        match savedProcess.State with
-                       | CountingState _ -> buildAlredyRunningCommand command.Data.FromUser savedProcess.Config.ExcludeMembers, None
+                       | CountingState _ -> buildAlreadyRunningCommand command.Data.FromUser savedProcess.Config.ExcludeMembers, None
                        | IdleState -> startNewCounting (Some savedProcess)
     | _ -> startNewCounting None
    
@@ -113,11 +113,10 @@ let handleIncomingCommand (command: IncomingCommand) (getProcess: int64-> Proces
     | IncomingCommandType.ExcludeMember -> handlerExcludeMember command getProcess
     | IncomingCommandType.IncludeMember -> handleIncludeMember command getProcess
     
-let handleUpdate (command: IncomingCommand) (handleOutgoingTelegramCommand:NewMessage->unit) =
+let handleUpdate (command: IncomingCommand): OutgoingCommand =
     let getProcess = ProcessStorage.getProcess ProcessStorage.defaultRedisClientFactory
     let (outgoingCommand, processToSave) = handleIncomingCommand command getProcess
     match processToSave with
     | Some x -> ProcessStorage.createOrUpdateProcess ProcessStorage.defaultRedisClientFactory x
     | _ -> ()
-    match command.Source with
-       | Telegram -> handleOutgoingTelegramCommand outgoingCommand
+    NewMessage outgoingCommand
