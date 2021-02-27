@@ -12,6 +12,10 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RebootInBot.Processing.Test
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RebootInBot.Commands", "RebootInBot.Commands\RebootInBot.Commands.fsproj", "{980AF30E-57D6-4218-92EF-F1AD47F6960D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Processing", "Processing", "{B88FE325-4F3E-41CA-B0AE-596AF0A52370}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RebootInBot.UnitTests", "RebootInBot.UnitTests\RebootInBot.UnitTests.fsproj", "{5C6A5C7A-4F44-4C7F-8437-B1BBDC8B6F3D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +46,13 @@ Global
 		{980AF30E-57D6-4218-92EF-F1AD47F6960D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{980AF30E-57D6-4218-92EF-F1AD47F6960D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{980AF30E-57D6-4218-92EF-F1AD47F6960D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C6A5C7A-4F44-4C7F-8437-B1BBDC8B6F3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C6A5C7A-4F44-4C7F-8437-B1BBDC8B6F3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C6A5C7A-4F44-4C7F-8437-B1BBDC8B6F3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C6A5C7A-4F44-4C7F-8437-B1BBDC8B6F3D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3D314462-3D96-49E3-8B76-A271D63F8B6A} = {B88FE325-4F3E-41CA-B0AE-596AF0A52370}
+		{6DF4A94D-2854-4C19-9CD7-101128AB2A41} = {B88FE325-4F3E-41CA-B0AE-596AF0A52370}
 	EndGlobalSection
 EndGlobal
