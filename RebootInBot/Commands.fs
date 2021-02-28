@@ -2,29 +2,16 @@ module RebootInBot.Commands
 open System
 open RebootInBot.Types
 open RebootInBot.Mentions
+open RebootInBot.StartTimer
 
 let private buildCommand getParticipants (message:IncomingMessage) (command: BotCommand) =
-    let buildStartTimer (message:IncomingMessage) =
-        { Chat = message.Chat
-          Starter = message.Author
-          ChatParticipants = getParticipants message.Chat }
-    
     match command with
-    | "/reboot" -> Some (Command.StartTimer (buildStartTimer message))
+    | "/reboot" -> Some (Command.StartTimer (buildStartTimer getParticipants message))
     | _ -> None
 
-let private startTimerProcess chat messageId =
-    Console.WriteLine("Started Timer")
-
-let private processCommand sendMessage command =
-    
-    let processStartTimer startTimerCommand =
-        buildMentionList startTimerCommand.Starter startTimerCommand.ChatParticipants
-            |> sendMessage startTimerCommand.Chat
-            |> startTimerProcess startTimerCommand.Chat
-        
+let private processCommand sendMessage command =        
     match command with
-    | StartTimer startTimer -> processStartTimer startTimer
+    | StartTimer startTimer -> processStartTimer sendMessage startTimer
 
 let processMessage getParticipants sendMessage (incomingMessage: IncomingMessage) =
     let getCommand incomingMessage =
