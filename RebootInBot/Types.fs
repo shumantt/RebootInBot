@@ -1,13 +1,17 @@
 module RebootInBot.Types
 
+open System
+
 // BotProcessing
-type Chat = unit
+type Chat = {
+    ChatId: Guid
+}
 type MessageAuthor = unit
 type MessageText = string
-type MessageId = unit
+type MessageId = Guid
 type Mention = unit
 type BotCommand = string
-type ChatParticipant = unit
+type ChatParticipant = string
 
 type Message = {
     Author: ChatParticipant

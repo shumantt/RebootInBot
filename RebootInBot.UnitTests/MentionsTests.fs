@@ -1,4 +1,4 @@
-module RebootInBot.Tests
+module RebootInBot.Tests.MentionsTests
 
 open RebootInBot.Mentions
 open Xunit
