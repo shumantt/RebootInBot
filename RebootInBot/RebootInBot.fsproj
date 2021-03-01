@@ -7,7 +7,6 @@
     <ItemGroup>
         <Compile Include="Types.fs" />
         <Compile Include="Mentions.fs" />
-        <Compile Include="TimerProcess.fs" />
         <Compile Include="StartTimer.fs" />
         <Compile Include="Commands.fs" />
     </ItemGroup>

@@ -8,9 +8,10 @@ let private buildCommand getParticipants (message:IncomingMessage) (command: Bot
     | "/reboot" -> Some (Command.StartTimer (buildStartTimer getParticipants message))
     | _ -> None
 
-let private processCommand sendMessage updateMessage command =        
+let private processCommand sendMessage updateMessage command =
+    let checkIsCancelled chat ()  = false
     match command with
-    | StartTimer startTimer -> processStartTimer sendMessage updateMessage startTimer
+    | StartTimer startTimer -> processStartTimer sendMessage updateMessage checkIsCancelled startTimer
 
 let processMessage getParticipants sendMessage updateMessage (incomingMessage: IncomingMessage) =
     let getCommand incomingMessage =

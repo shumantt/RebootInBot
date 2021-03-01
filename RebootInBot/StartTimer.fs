@@ -1,23 +1,17 @@
 module RebootInBot.StartTimer
 
-open System.Threading
 open RebootInBot.Types
 open RebootInBot.Mentions
-open RebootInBot.TimerProcess
 
 let private createTimerProcess updateMessage checkIsCancelled =
-    let mutable numberOfUpdates = 10
-    use cts = new CancellationTokenSource()
-    let (task, timerTicks) = createTimer 1 numberOfUpdates
-
-    timerTicks
-    |> Observable.subscribe (fun _ ->
-        updateMessage (sprintf "Перезапуск через %i" numberOfUpdates)
-        numberOfUpdates <- numberOfUpdates - 1
-        if checkIsCancelled () then cts.Cancel())
-    |> ignore
-
-    async { Async.Start(task, cts.Token) }
+    async {
+        for i in 10.. -1 .. 1 do
+          updateMessage (sprintf "Перезапуск через %i" i)
+          let cancelled = checkIsCancelled ()
+          if cancelled then
+              Async.CancelDefaultToken()
+          do! Async.Sleep 10_000
+    }
 
 let buildStartTimer getParticipants (message: IncomingMessage) =
     { Chat = message.Chat
