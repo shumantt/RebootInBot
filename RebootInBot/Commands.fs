@@ -10,8 +10,9 @@ let private buildCommand getParticipants (message:IncomingMessage) (command: Bot
 
 let private processCommand sendMessage updateMessage command =
     let checkIsCancelled chat ()  = false
+    let processStartTimerWithDefaultConfig = processStartTimer sendMessage updateMessage checkIsCancelled (10, 1000)
     match command with
-    | StartTimer startTimer -> processStartTimer sendMessage updateMessage checkIsCancelled startTimer
+    | StartTimer startTimer -> processStartTimerWithDefaultConfig startTimer
 
 let processMessage getParticipants sendMessage updateMessage (incomingMessage: IncomingMessage) =
     let getCommand incomingMessage =
