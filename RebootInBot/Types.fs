@@ -39,5 +39,13 @@ type StartTimer = {
 type Command =
     | StartTimer of StartTimer
 
-        
+type TimerWork = Async<unit>       
 
+type Work =
+    | TimerWork of TimerWork
+    | NoWork
+    
+type WorkResult =
+    | Scheduled
+    | Throttled
+    | Done

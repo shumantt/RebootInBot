@@ -1,5 +1,4 @@
 module RebootInBot.Commands
-open System
 open RebootInBot.Types
 open RebootInBot.StartTimer
 
@@ -12,7 +11,7 @@ let private processCommand sendMessage updateMessage command =
     let checkIsCancelled chat ()  = false
     let processStartTimerWithDefaultConfig = processStartTimer sendMessage updateMessage checkIsCancelled (10, 1000)
     match command with
-    | StartTimer startTimer -> processStartTimerWithDefaultConfig startTimer
+    | StartTimer startTimer -> Work.TimerWork (processStartTimerWithDefaultConfig startTimer)
 
 let processMessage getParticipants sendMessage updateMessage (incomingMessage: IncomingMessage) =
     let getCommand incomingMessage =
@@ -23,4 +22,4 @@ let processMessage getParticipants sendMessage updateMessage (incomingMessage: I
     let command = getCommand incomingMessage
     match command with
     | Some command -> processCommand sendMessage updateMessage command
-    | _ -> async { Console.WriteLine("No action") }
+    | _ -> NoWork
