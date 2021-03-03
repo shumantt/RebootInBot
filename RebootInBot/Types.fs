@@ -41,11 +41,16 @@ type Command =
 
 type TimerWork = Async<unit>       
 
+type CancelWork = Async<unit>
+
 type Work =
     | TimerWork of TimerWork
-    | NoWork
     
 type WorkResult =
-    | Scheduled
     | Throttled
     | Done
+
+type WorkQueueItem =
+    | Work of Work
+    | WorkResult of WorkResult
+    
