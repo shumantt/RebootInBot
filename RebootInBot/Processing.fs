@@ -2,21 +2,22 @@ module RebootInBot.Processing
 
 open RebootInBot.Types
 open RebootInBot.Commands
+open RebootInBot.StartTimer
 
-let processMessage checkIsCancelled getParticipants sendMessage updateMessage (longRunningWorker: MailboxProcessor<WorkQueueItem>) incomingMessage =
-   let work = processMessage getParticipants sendMessage updateMessage checkIsCancelled incomingMessage
-   match work with
-   | None -> ()
-   | Some someWork ->
-       match someWork with
-       | TimerWork timerWork -> longRunningWorker.Post (WorkQueueItem.Work (Work.TimerWork timerWork))
+type StartedProcessor(longRunningWorker: MailboxProcessor<WorkQueueItem>) =
+    let processCommand command =
+       match command with
+       | None -> ()
+       | Some someCommand ->
+           match someCommand with
+           | StartTimer startTimer -> longRunningWorker.Post (WorkQueueItem.Work (Work.TimerWork startTimer))
 
-type StartedProcessor(checkIsCancelled, getParticipants, sendMessage, updateMessage, longRunningWorker) =
     member this.Process(message:IncomingMessage) =
-        processMessage checkIsCancelled getParticipants sendMessage updateMessage longRunningWorker message
+        parseCommand message
+        |> processCommand 
 
-type Processor(getParticipants, sendMessage, updateMessage, onThrottled, longRunningLimit) =
-    let startLongRunningWorker =
+type Processor(getParticipants, sendMessage, updateMessage, onThrottled, longRunningLimit, timerConfig) =
+    let startLongRunningWorker checkIsCancelled =
         let agent cancellationToken = MailboxProcessor.Start((fun inbox -> async {
             let mutable longRunningJobs = 0
             
@@ -24,7 +25,7 @@ type Processor(getParticipants, sendMessage, updateMessage, onThrottled, longRun
                 if longRunningJobs < longRunningLimit then
                     longRunningJobs <- longRunningJobs + 1
                     Async.Start(async {
-                        do! timerWork
+                        do! processStartTimer getParticipants sendMessage updateMessage checkIsCancelled timerConfig timerWork
                         inbox.Post(WorkQueueItem.WorkResult Done)
                     })
                 else
@@ -47,7 +48,7 @@ type Processor(getParticipants, sendMessage, updateMessage, onThrottled, longRun
     member this.StartProcessor(cancellationToken) =
         //todo configure storage
         let checkIsCancelled chat () = false
-        let longRunningWorker = startLongRunningWorker cancellationToken
-        StartedProcessor(checkIsCancelled, getParticipants, sendMessage, updateMessage, longRunningWorker)
+        let longRunningWorker = startLongRunningWorker checkIsCancelled cancellationToken
+        StartedProcessor(longRunningWorker)
     
         

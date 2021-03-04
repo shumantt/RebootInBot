@@ -9,9 +9,6 @@ open FsUnit
 
 [<Fact>]
 let  ``test buildStartTimer`` () =
-    let participants = ["participant 1"; "participant 2"]
-    let getParticipants _ =
-        participants
     let chat = { ChatId = Guid.NewGuid() }
     let author = "author"
     let message: IncomingMessage =
@@ -21,12 +18,11 @@ let  ``test buildStartTimer`` () =
           MessageId = Guid.NewGuid()
           Commands = [ "/reboot" ] }
     
-    let actual = buildStartTimer getParticipants message
+    let actual = buildStartTimerCommand message
     
     let expected =
         { Chat = chat
-          Starter = author
-          ChatParticipants = participants }
+          Starter = author }
     actual |> should equal expected
 
 [<Fact>]
@@ -39,12 +35,17 @@ let ``processStartTimer sends message and updates it N times if not cancelled`` 
         Console.WriteLine(text)
         updateCount <- updateCount + 1
     let checkIsCancelled _ () = false
+    let getParticipants _ =
+        ["starter"; "participant"]
     let startTimer =
           { Chat = { ChatId = Guid.NewGuid() }
-            Starter = "starter"
-            ChatParticipants = ["starter"; "p2"] }
+            Starter = "starter" }
+    let config = {
+        Delay = 0
+        CountsNumber = N
+    }
     
-    processStartTimer sendMessage updateMessage checkIsCancelled (N, 0) startTimer
+    processStartTimer getParticipants sendMessage updateMessage checkIsCancelled config startTimer
     |> Async.RunSynchronously
     
     messageSentСount |> should equal 2
@@ -54,19 +55,25 @@ let ``processStartTimer sends message and updates it N times if not cancelled`` 
 let ``processStartTimer is cancelable`` () =
     let N = 10
     let canceltAt = 3
-    let mutable messageSentСount = 0
+    let mutable messages = ResizeArray([])
     let mutable updateCount = 0
-    let sendMessage _ _ _ = messageSentСount <- messageSentСount + 1
+    let sendMessage _ _ text = messages.Add text
     let updateMessage _ _ _ =
         updateCount <- updateCount + 1
+    
     let checkIsCancelled _ () = updateCount = canceltAt
+    let getParticipants _ =
+        ["starter"; "participant"]
     let startTimer =
           { Chat = { ChatId = Guid.NewGuid() }
-            Starter = "starter"
-            ChatParticipants = ["starter"; "p2"] }
+            Starter = "starter" }
+    let config = {
+        Delay = 0
+        CountsNumber = N
+    }
     
-    processStartTimer sendMessage updateMessage checkIsCancelled (N, 0) startTimer
+    processStartTimer getParticipants sendMessage updateMessage checkIsCancelled config startTimer
     |> Async.RunSynchronously
     
-    messageSentСount |> should equal 1
+    messages.Count |> should equal 1
     updateCount |> should equal canceltAt

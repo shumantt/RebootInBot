@@ -33,18 +33,15 @@ type Process = unit
 type StartTimer = {
     Chat: Chat
     Starter: ChatParticipant
-    ChatParticipants: ChatParticipant list
 }
 
 type Command =
-    | StartTimer of StartTimer
-
-type TimerWork = Async<unit>       
+    | StartTimer of StartTimer     
 
 type CancelWork = Async<unit>
 
 type Work =
-    | TimerWork of TimerWork
+    | TimerWork of StartTimer
     
 type WorkResult =
     | Throttled
@@ -53,3 +50,8 @@ type WorkResult =
 type WorkQueueItem =
     | Work of Work
     | WorkResult of WorkResult
+
+type TimerConfig = {
+    Delay: int
+    CountsNumber: int
+}

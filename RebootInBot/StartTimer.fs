@@ -3,32 +3,35 @@ module RebootInBot.StartTimer
 open RebootInBot.Types
 open RebootInBot.Mentions
 
-let private createTimerProcess sendFinished updateMessage checkIsCancelled (countTimes, delay) =
+let private createTimerProcess sendFinished updateMessage checkIsCancelled config =
     let rec doUpdates count =
         async {
              let cancelled = checkIsCancelled ()
              if not cancelled then
                  if count > 0 then
                     updateMessage (sprintf "Перезапуск через %i" count)
-                    do! Async.Sleep delay
+                    do! Async.Sleep config.Delay
                     do! doUpdates (count - 1)
                  else
-                     sendFinished "Поехали!"           
+                     sendFinished "Поехали!" |> ignore      
         }
         
-    doUpdates countTimes
+    doUpdates config.CountsNumber
 
-let buildStartTimer getParticipants (message: IncomingMessage) =
-    { Chat = message.Chat
-      Starter = message.Author
-      ChatParticipants = getParticipants message.Chat }
+let buildStartTimerCommand (message:IncomingMessage) =
+    {
+       Chat = message.Chat
+       Starter = message.Author
+    }
 
-let processStartTimer sendMessage updateMessage checkIsCancelled config startTimerCommand =
-    let sendToChat = sendMessage startTimerCommand.Chat
-    let sendToChatWithAuthor = sendToChat (startTimerCommand.Starter |> List.singleton)
-    buildMentionList startTimerCommand.Starter startTimerCommand.ChatParticipants
+let processStartTimer getParticipants sendMessage updateMessage checkIsCancelled config startTimer =
+    let sendToChat = sendMessage startTimer.Chat
+    let sendToChatWithStarter = sendToChat (startTimer.Starter |> List.singleton)
+    let checkIsCancelled = checkIsCancelled startTimer.Chat
+    
+    getParticipants startTimer.Chat
+    |> buildMentionList startTimer.Starter 
     |> fun mentions -> sendToChat mentions "Буду перезапускать, никто не против?"
     |> fun messageId ->
-        let updateMessage = updateMessage startTimerCommand.Chat messageId
-        let checkIsCancelled = checkIsCancelled startTimerCommand.Chat
-        createTimerProcess sendToChatWithAuthor updateMessage checkIsCancelled config
+        let updateMessage = updateMessage startTimer.Chat messageId
+        createTimerProcess sendToChatWithStarter updateMessage checkIsCancelled config
