@@ -3,16 +3,19 @@ module RebootInBot.Processing
 open RebootInBot.Types
 open RebootInBot.Commands
 
-type StartedProcessor(checkIsCancelled, longRunningWorker: MailboxProcessor<WorkQueueItem>) =
-   member this.Process(getParticipants, sendMessage, updateMessage, incomingMessage) =
-       let work = processMessage getParticipants sendMessage updateMessage checkIsCancelled incomingMessage
-       match work with
-       | None -> ()
-       | Some someWork ->
-           match someWork with
-           | TimerWork timerWork -> longRunningWorker.Post (WorkQueueItem.Work (Work.TimerWork timerWork))
+let processMessage checkIsCancelled getParticipants sendMessage updateMessage (longRunningWorker: MailboxProcessor<WorkQueueItem>) incomingMessage =
+   let work = processMessage getParticipants sendMessage updateMessage checkIsCancelled incomingMessage
+   match work with
+   | None -> ()
+   | Some someWork ->
+       match someWork with
+       | TimerWork timerWork -> longRunningWorker.Post (WorkQueueItem.Work (Work.TimerWork timerWork))
 
-type Processor(onThrottled, longRunningLimit) =
+type StartedProcessor(checkIsCancelled, getParticipants, sendMessage, updateMessage, longRunningWorker) =
+    member this.Process(message:IncomingMessage) =
+        processMessage checkIsCancelled getParticipants sendMessage updateMessage longRunningWorker message
+
+type Processor(getParticipants, sendMessage, updateMessage, onThrottled, longRunningLimit) =
     let startLongRunningWorker =
         let agent cancellationToken = MailboxProcessor.Start((fun inbox -> async {
             let mutable longRunningJobs = 0
@@ -42,8 +45,9 @@ type Processor(onThrottled, longRunningLimit) =
         agent
     
     member this.StartProcessor(cancellationToken) =
+        //todo configure storage
         let checkIsCancelled chat () = false
         let longRunningWorker = startLongRunningWorker cancellationToken
-        StartedProcessor(checkIsCancelled, longRunningWorker)
+        StartedProcessor(checkIsCancelled, getParticipants, sendMessage, updateMessage, longRunningWorker)
     
         

@@ -53,4 +53,3 @@ type WorkResult =
 type WorkQueueItem =
     | Work of Work
     | WorkResult of WorkResult
-    
