@@ -1,5 +1,6 @@
 module RebootInBot.Processing
 
+open System
 open System.Threading
 open RebootInBot.Types
 
@@ -10,7 +11,7 @@ type LongRunningProcessor<'a> private (longRunningWorker: MailboxProcessor<WorkQ
             ReplyChannel = rc
         })
 
-    static member Start(processWork, longRunningLimit, onWorkFail, ?cancellationToken:CancellationToken) =
+    static member Start<'a>(processWork, longRunningLimit, onWorkFail, ?cancellationToken:CancellationToken) =
         let agent = MailboxProcessor.Start((fun inbox -> async {
             let mutable longRunningJobs = 0
             let handleLongRunningWork work =
@@ -35,10 +36,15 @@ type LongRunningProcessor<'a> private (longRunningWorker: MailboxProcessor<WorkQ
 
             }), ?cancellationToken = cancellationToken)
         
-        LongRunningProcessor(agent)
+        new LongRunningProcessor<'a>(agent)
         
     static member Start<'a>(processWork, longRunningLimit, ?cancellationToken:CancellationToken) =
         let onWorkFail (_:'a) = ()
         LongRunningProcessor<'a>.Start(processWork, longRunningLimit, onWorkFail, ?cancellationToken = cancellationToken)
+        
+        
+    interface IDisposable with
+        member x.Dispose() = 
+            (longRunningWorker :> IDisposable).Dispose()
     
         

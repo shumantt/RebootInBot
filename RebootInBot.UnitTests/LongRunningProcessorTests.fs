@@ -44,7 +44,7 @@ let ``should call onWorkFail if fails`` () =
     let mutable onFailedCalled = false
     let processWork _ = async { failwith "failed" }
     let onWorkFailed _ = onFailedCalled <- true
-    let processor = LongRunningProcessor.Start(processWork, 1, onWorkFailed)
+    let processor = LongRunningProcessor<_>.Start(processWork, 1, onWorkFailed)
     
     let actual = processor.Process("something")
     
