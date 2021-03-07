@@ -18,6 +18,7 @@
         <Compile Include="MentionsTests.fs" />
         <Compile Include="StartTimerTests.fs" />
         <Compile Include="CommandsTests.fs" />
+        <Compile Include="LongRunningProcessorTests.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
 

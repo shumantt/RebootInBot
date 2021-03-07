@@ -6,10 +6,10 @@
 
     <ItemGroup>
         <Compile Include="Types.fs" />
+        <Compile Include="Processing.fs" />
         <Compile Include="Mentions.fs" />
         <Compile Include="StartTimer.fs" />
         <Compile Include="Commands.fs" />
-        <Compile Include="Processing.fs" />
     </ItemGroup>
 
 </Project>

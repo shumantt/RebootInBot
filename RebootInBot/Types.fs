@@ -40,16 +40,18 @@ type Command =
 
 type CancelWork = Async<unit>
 
-type Work =
-    | TimerWork of StartTimer
-    
-type WorkResult =
+type LongRunningResult =
+    | Started
     | Throttled
-    | Done
 
-type WorkQueueItem =
-    | Work of Work
-    | WorkResult of WorkResult
+type LongRunningWork<'a> = {
+    WorkData: 'a
+    ReplyChannel: AsyncReplyChannel<LongRunningResult>
+}
+
+type WorkQueueItem<'a> =
+    | Work of LongRunningWork<'a>
+    | WorkDone
 
 type TimerConfig = {
     Delay: int

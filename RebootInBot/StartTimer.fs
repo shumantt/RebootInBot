@@ -24,9 +24,15 @@ let buildStartTimerCommand (message:IncomingMessage) =
        Starter = message.Author
     }
 
+let private sendToChat sendMessage startTimer =
+    sendMessage startTimer.Chat
+    
+let private sendToChatWithStarter sendToChat startTimer =
+    sendToChat (startTimer.Starter |> List.singleton)
+
 let processStartTimer getParticipants sendMessage updateMessage checkIsCancelled config startTimer =
-    let sendToChat = sendMessage startTimer.Chat
-    let sendToChatWithStarter = sendToChat (startTimer.Starter |> List.singleton)
+    let sendToChat = sendToChat sendMessage startTimer
+    let sendToChatWithStarter = sendToChatWithStarter sendToChat startTimer
     let checkIsCancelled = checkIsCancelled startTimer.Chat
     
     getParticipants startTimer.Chat
@@ -35,3 +41,6 @@ let processStartTimer getParticipants sendMessage updateMessage checkIsCancelled
     |> fun messageId ->
         let updateMessage = updateMessage startTimer.Chat messageId
         createTimerProcess sendToChatWithStarter updateMessage checkIsCancelled config
+        
+let processThrottled sendMessage startTimer =
+    sendMessage startTimer.Chat startTimer

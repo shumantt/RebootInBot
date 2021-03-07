@@ -1,54 +1,44 @@
 module RebootInBot.Processing
 
+open System.Threading
 open RebootInBot.Types
-open RebootInBot.Commands
-open RebootInBot.StartTimer
 
-type StartedProcessor(longRunningWorker: MailboxProcessor<WorkQueueItem>) =
-    let processCommand command =
-       match command with
-       | None -> ()
-       | Some someCommand ->
-           match someCommand with
-           | StartTimer startTimer -> longRunningWorker.Post (WorkQueueItem.Work (Work.TimerWork startTimer))
+type LongRunningProcessor<'a> private (longRunningWorker: MailboxProcessor<WorkQueueItem<'a>>) =
+    member this.Process(workData) =
+        longRunningWorker.PostAndReply(fun rc -> WorkQueueItem.Work {
+            WorkData = workData
+            ReplyChannel = rc
+        })
 
-    member this.Process(message:IncomingMessage) =
-        parseCommand message
-        |> processCommand 
-
-type Processor(getParticipants, sendMessage, updateMessage, onThrottled, longRunningLimit, timerConfig) =
-    let startLongRunningWorker checkIsCancelled =
-        let agent cancellationToken = MailboxProcessor.Start((fun inbox -> async {
+    static member Start(processWork, longRunningLimit, onWorkFail, ?cancellationToken:CancellationToken) =
+        let agent = MailboxProcessor.Start((fun inbox -> async {
             let mutable longRunningJobs = 0
-            
-            let handleTimerWork timerWork =
+            let handleLongRunningWork work =
                 if longRunningJobs < longRunningLimit then
                     longRunningJobs <- longRunningJobs + 1
                     Async.Start(async {
-                        do! processStartTimer getParticipants sendMessage updateMessage checkIsCancelled timerConfig timerWork
-                        inbox.Post(WorkQueueItem.WorkResult Done)
-                    })
+                        try 
+                            do! processWork work.WorkData
+                            inbox.Post(WorkDone)
+                        with
+                        | _ -> onWorkFail work.WorkData
+                    }, ?cancellationToken = cancellationToken)
+                    work.ReplyChannel.Reply(Started)
                 else
-                    inbox.Post(WorkQueueItem.WorkResult Throttled)
+                    work.ReplyChannel.Reply(Throttled)
             
             while true do
                 let! workItem = inbox.Receive()
                 match workItem with
-                | Work work ->
-                    match work with
-                    | TimerWork timerWork -> handleTimerWork timerWork
-                | WorkResult result ->
-                    match result with
-                    | Done -> longRunningJobs <- longRunningJobs - 1
-                    | Throttled -> onThrottled
+                | Work work -> handleLongRunningWork work
+                | WorkDone -> longRunningJobs <- longRunningJobs - 1
 
-            }), cancellationToken)
-        agent
-    
-    member this.StartProcessor(cancellationToken) =
-        //todo configure storage
-        let checkIsCancelled chat () = false
-        let longRunningWorker = startLongRunningWorker checkIsCancelled cancellationToken
-        StartedProcessor(longRunningWorker)
+            }), ?cancellationToken = cancellationToken)
+        
+        LongRunningProcessor(agent)
+        
+    static member Start<'a>(processWork, longRunningLimit, ?cancellationToken:CancellationToken) =
+        let onWorkFail (_:'a) = ()
+        LongRunningProcessor<'a>.Start(processWork, longRunningLimit, onWorkFail, ?cancellationToken = cancellationToken)
     
         
