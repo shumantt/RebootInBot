@@ -23,6 +23,11 @@ type Message = {
 
 type IncomingMessage = Message
 
+type IBotMessenger =
+    abstract member SendMessage: Chat -> ChatParticipant list -> string -> MessageId
+    abstract member GetParticipants: Chat -> ChatParticipant list
+    abstract member UpdateMessage: Chat -> MessageId -> string -> unit
+
 // Commands processing
 
 type InformationText = unit

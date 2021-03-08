@@ -10,6 +10,7 @@
         <Compile Include="Mentions.fs" />
         <Compile Include="StartTimer.fs" />
         <Compile Include="Commands.fs" />
+        <Compile Include="RebootInBot.fs" />
     </ItemGroup>
 
 </Project>
