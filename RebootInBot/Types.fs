@@ -3,8 +3,10 @@ module RebootInBot.Types
 open System
 
 // BotProcessing
+type ChatId = Guid
+
 type Chat = {
-    ChatId: Guid
+    ChatId: ChatId
 }
 type MessageAuthor = unit
 type MessageText = string
@@ -33,7 +35,10 @@ type IBotMessenger =
 type InformationText = unit
 
 // Start
-type Process = unit
+type Process = {
+    ChatId: ChatId
+    Starter: ChatParticipant
+}
 
 type StartTimer = {
     Chat: Chat

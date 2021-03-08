@@ -30,16 +30,29 @@ let private sendToChat sendMessage startTimer =
 let private sendToChatWithStarter sendMessage startTimer =
     sendMessage startTimer.Chat (startTimer.Starter |> List.singleton)
 
-let processStartTimer getParticipants sendMessage updateMessage checkIsCancelled config startTimer =
+let processStartTimer getParticipants sendMessage updateMessage saveProcess getProcess config startTimer =
     let sendToChat = sendToChat sendMessage startTimer
     let sendToChatWithStarter = sendToChatWithStarter sendMessage startTimer
-    let checkIsCancelled = checkIsCancelled startTimer.Chat
+    
+    let saveProcess () =
+        let chatProcess = {
+            ChatId = startTimer.Chat.ChatId
+            Starter = startTimer.Starter
+        }
+        saveProcess chatProcess
+    
+    let checkIsCancelled () =
+        let chatProcess = getProcess startTimer.Chat.ChatId
+        match chatProcess with
+        | Some _ -> false
+        | None -> true
     
     getParticipants startTimer.Chat
     |> buildMentionList startTimer.Starter 
     |> fun mentions -> sendToChat mentions "Буду перезапускать, никто не против?"
     |> fun messageId ->
         let updateMessage = updateMessage startTimer.Chat messageId
+        saveProcess()
         createTimerProcess sendToChatWithStarter updateMessage checkIsCancelled config
         
 let processThrottled sendMessage startTimer =

@@ -2,6 +2,8 @@ module RebootInBot.Bot
 
 open System
 open System.Threading
+open RebootInBot.Storage
+open RebootInBot.Storage.InMemoryStorage
 open RebootInBot.Types
 open RebootInBot.Processing
 open RebootInBot.Commands
@@ -31,12 +33,18 @@ type Bot private(messenger: IBotMessenger, processor:LongRunningProcessor<StartT
     
     static member Start(messenger: IBotMessenger) =
         let cancellationTokenSource = new CancellationTokenSource()
-        let checkIsCancelled _ () = false
+        let inMemoryStorage = InMemoryStorage()
         let defaultTimerConfig = {
             Delay = 1000
             CountsNumber = 10
         }
-        let timerProcessor = processStartTimer messenger.GetParticipants messenger.SendMessage messenger.UpdateMessage checkIsCancelled defaultTimerConfig
+        let timerProcessor = processStartTimer
+                                 messenger.GetParticipants
+                                 messenger.SendMessage
+                                 messenger.UpdateMessage
+                                 inMemoryStorage.SaveProcess
+                                 inMemoryStorage.GetProcess
+                                 defaultTimerConfig
         let longRunningProcessor = LongRunningProcessor<StartTimer>.Start(timerProcessor, 10, cancellationTokenSource.Token)
         new Bot(messenger, longRunningProcessor, cancellationTokenSource)
     

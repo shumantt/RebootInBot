@@ -34,7 +34,13 @@ let ``processStartTimer sends message and updates it N times if not cancelled`` 
     let updateMessage _ _ (text:string) =
         Console.WriteLine(text)
         updateCount <- updateCount + 1
-    let checkIsCancelled _ () = false
+    let getProcess chatId =
+        Some {
+            ChatId = chatId
+            Starter = "starter"
+        }
+    let saveProcess chatId =
+        ()
     let getParticipants _ =
         ["starter"; "participant"]
     let startTimer =
@@ -45,7 +51,7 @@ let ``processStartTimer sends message and updates it N times if not cancelled`` 
         CountsNumber = N
     }
     
-    processStartTimer getParticipants sendMessage updateMessage checkIsCancelled config startTimer
+    processStartTimer getParticipants sendMessage updateMessage saveProcess getProcess config startTimer
     |> Async.RunSynchronously
     
     messageSentСount |> should equal 2
@@ -61,7 +67,17 @@ let ``processStartTimer is cancelable`` () =
     let updateMessage _ _ _ =
         updateCount <- updateCount + 1
     
-    let checkIsCancelled _ () = updateCount = canceltAt
+    let getProcess chatId =
+        match updateCount = canceltAt with
+        | true -> None
+        | false ->  Some {
+            ChatId = chatId
+            Starter = "starter"
+        }
+                               
+    let saveProcess chatId =
+        ()
+        
     let getParticipants _ =
         ["starter"; "participant"]
     let startTimer =
@@ -72,7 +88,7 @@ let ``processStartTimer is cancelable`` () =
         CountsNumber = N
     }
     
-    processStartTimer getParticipants sendMessage updateMessage checkIsCancelled config startTimer
+    processStartTimer getParticipants sendMessage updateMessage saveProcess getProcess config startTimer
     |> Async.RunSynchronously
     
     messages.Count |> should equal 1
