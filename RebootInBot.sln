@@ -2,12 +2,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RebootInBot", "RebootInBot\RebootInBot.fsproj", "{823BE180-EB44-40B9-B833-51F0B862F157}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RebootInBot.Processing", "RebootInBot.Processing\RebootInBot.Processing.fsproj", "{3D314462-3D96-49E3-8B76-A271D63F8B6A}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RebootInBot.Processing.Tests", "RebootInBot.Processing.Tests\RebootInBot.Processing.Tests.fsproj", "{6DF4A94D-2854-4C19-9CD7-101128AB2A41}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Processing", "Processing", "{B88FE325-4F3E-41CA-B0AE-596AF0A52370}"
-EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RebootInBot.UnitTests", "RebootInBot.UnitTests\RebootInBot.UnitTests.fsproj", "{5C6A5C7A-4F44-4C7F-8437-B1BBDC8B6F3D}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RebootInBot.IntegrationTests", "RebootInBot.IntegrationTests\RebootInBot.IntegrationTests.fsproj", "{0B08D903-B780-4D30-BDCB-DDF22CA2726A}"
@@ -22,14 +16,6 @@ Global
 		{823BE180-EB44-40B9-B833-51F0B862F157}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{823BE180-EB44-40B9-B833-51F0B862F157}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{823BE180-EB44-40B9-B833-51F0B862F157}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3D314462-3D96-49E3-8B76-A271D63F8B6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3D314462-3D96-49E3-8B76-A271D63F8B6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3D314462-3D96-49E3-8B76-A271D63F8B6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3D314462-3D96-49E3-8B76-A271D63F8B6A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6DF4A94D-2854-4C19-9CD7-101128AB2A41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6DF4A94D-2854-4C19-9CD7-101128AB2A41}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6DF4A94D-2854-4C19-9CD7-101128AB2A41}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6DF4A94D-2854-4C19-9CD7-101128AB2A41}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5C6A5C7A-4F44-4C7F-8437-B1BBDC8B6F3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5C6A5C7A-4F44-4C7F-8437-B1BBDC8B6F3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5C6A5C7A-4F44-4C7F-8437-B1BBDC8B6F3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -40,7 +26,5 @@ Global
 		{0B08D903-B780-4D30-BDCB-DDF22CA2726A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{3D314462-3D96-49E3-8B76-A271D63F8B6A} = {B88FE325-4F3E-41CA-B0AE-596AF0A52370}
-		{6DF4A94D-2854-4C19-9CD7-101128AB2A41} = {B88FE325-4F3E-41CA-B0AE-596AF0A52370}
 	EndGlobalSection
 EndGlobal
