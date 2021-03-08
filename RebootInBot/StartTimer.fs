@@ -24,10 +24,10 @@ let buildStartTimerCommand (message:IncomingMessage) =
        Starter = message.Author
     }
 
-let private sendToChat sendMessage startTimer =
+let private sendToChat sendMessage (startTimer:StartTimer) =
     sendMessage startTimer.Chat
     
-let private sendToChatWithStarter sendMessage startTimer =
+let private sendToChatWithStarter sendMessage (startTimer:StartTimer) =
     sendMessage startTimer.Chat (startTimer.Starter |> List.singleton)
 
 let processStartTimer getParticipants sendMessage updateMessage saveProcess getProcess config startTimer =
@@ -55,5 +55,5 @@ let processStartTimer getParticipants sendMessage updateMessage saveProcess getP
         saveProcess()
         createTimerProcess sendToChatWithStarter updateMessage checkIsCancelled config
         
-let processThrottled sendMessage startTimer =
+let processThrottled sendMessage (startTimer:StartTimer) =
     sendToChatWithStarter sendMessage startTimer "Не можем обработаь ваш запрос"

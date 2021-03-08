@@ -2,15 +2,15 @@ module RebootInBot.Bot
 
 open System
 open System.Threading
-open RebootInBot.Storage
 open RebootInBot.Storage.InMemoryStorage
 open RebootInBot.Types
 open RebootInBot.Processing
 open RebootInBot.Commands
 open RebootInBot.StartTimer
+open RebootInBot.CancelTimer
     
     
-type Bot private(messenger: IBotMessenger, processor:LongRunningProcessor<StartTimer>, cts: CancellationTokenSource) =
+type Bot private(messenger: IBotMessenger, storage: InMemoryStorage, processor:LongRunningProcessor<StartTimer>, cts: CancellationTokenSource) =
     
     let processCommand command =
         
@@ -24,6 +24,7 @@ type Bot private(messenger: IBotMessenger, processor:LongRunningProcessor<StartT
         
         match command with
         | StartTimer startTimer -> processStartTimer startTimer
+        | CancelTimer cancelTimer -> processCancelTimer storage.GetProcess storage.DeleteProcess messenger.SendMessage cancelTimer
     
     member this.ProcessMessage(message:IncomingMessage) =
         message
@@ -46,7 +47,7 @@ type Bot private(messenger: IBotMessenger, processor:LongRunningProcessor<StartT
                                  inMemoryStorage.GetProcess
                                  defaultTimerConfig
         let longRunningProcessor = LongRunningProcessor<StartTimer>.Start(timerProcessor, 10, cancellationTokenSource.Token)
-        new Bot(messenger, longRunningProcessor, cancellationTokenSource)
+        new Bot(messenger, inMemoryStorage, longRunningProcessor, cancellationTokenSource)
     
     
     interface IDisposable with

@@ -17,6 +17,7 @@
     <ItemGroup>
         <Compile Include="MentionsTests.fs" />
         <Compile Include="StartTimerTests.fs" />
+        <Compile Include="CancelTimerTests.fs" />
         <Compile Include="CommandsTests.fs" />
         <Compile Include="LongRunningProcessorTests.fs" />
         <Compile Include="Program.fs" />

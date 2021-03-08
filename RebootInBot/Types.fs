@@ -45,8 +45,13 @@ type StartTimer = {
     Starter: ChatParticipant
 }
 
+type CancelTimer = {
+    Chat: Chat
+}
+
 type Command =
-    | StartTimer of StartTimer     
+    | StartTimer of StartTimer
+    | CancelTimer of CancelTimer
 
 type CancelWork = Async<unit>
 

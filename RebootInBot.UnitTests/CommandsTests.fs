@@ -23,7 +23,25 @@ let ``parseCommand should return StartTimer on /reboot command`` () =
     let actual = parseCommand message
     
     actual |> should equal (Some (Command.StartTimer expected) )
+
+[<Fact>]
+let ``parseCommand should return CancelTimer on /cancel command`` () =
+    let chat = { ChatId = Guid.NewGuid() }
+    let author = "author"
+    let message: IncomingMessage =
+        { Chat = chat
+          Author = author
+          Text = "text"
+          MessageId = Guid.NewGuid()
+          Commands = [ "/cancel" ] }
+    let expected =
+        { Chat = chat  }
     
+    let actual = parseCommand message
+    
+    actual |> should equal (Some (Command.CancelTimer expected) )
+
+[<Fact>]    
 let ``parseCommand should return None on unknown command`` () =
     let chat = { ChatId = Guid.NewGuid() }
     let author = "author"
