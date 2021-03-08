@@ -6,15 +6,16 @@ open RebootInBot.Types
 type InMemoryStorage() =
     let processesStorage = Dictionary<ChatId, Process>()
     
-    member this.SaveProcess(chatProcess) =
-        processesStorage.Add(chatProcess.ChatId, chatProcess)
+    interface IStorage with
+        member this.SaveProcess(chatProcess) =
+            processesStorage.Add(chatProcess.ChatId, chatProcess)
     
-    member this.GetProcess(chatId: ChatId) =
-        let found, chatProcess = processesStorage.TryGetValue chatId
-        if(found) then
-            Some chatProcess
-        else
-            None
+        member this.GetProcess(chatId: ChatId) =
+            let found, chatProcess = processesStorage.TryGetValue chatId
+            if(found) then
+                Some chatProcess
+            else
+                None
             
-    member this.DeleteProcess(chatId: ChatId) =
-        processesStorage.Remove chatId
+        member this.DeleteProcess(chatId: ChatId) =
+            processesStorage.Remove chatId |> ignore

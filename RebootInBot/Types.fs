@@ -31,15 +31,16 @@ type IBotMessenger =
     abstract member UpdateMessage: Chat -> MessageId -> string -> unit
 
 // Commands processing
-
-type InformationText = unit
-
-// Start
 type Process = {
     ChatId: ChatId
     Starter: ChatParticipant
 }
 
+type IStorage =
+    abstract member SaveProcess: Process -> unit
+    abstract member GetProcess: ChatId -> Process option
+    abstract member DeleteProcess: ChatId -> unit
+    
 type StartTimer = {
     Chat: Chat
     Starter: ChatParticipant

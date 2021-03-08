@@ -10,7 +10,7 @@ open RebootInBot.StartTimer
 open RebootInBot.CancelTimer
     
     
-type Bot private(messenger: IBotMessenger, storage: InMemoryStorage, processor:LongRunningProcessor<StartTimer>, cts: CancellationTokenSource) =
+type Bot private(messenger: IBotMessenger, storage: IStorage, processor:LongRunningProcessor<StartTimer>, cts: CancellationTokenSource) =
     
     let processCommand command =
         
@@ -34,7 +34,7 @@ type Bot private(messenger: IBotMessenger, storage: InMemoryStorage, processor:L
     
     static member Start(messenger: IBotMessenger) =
         let cancellationTokenSource = new CancellationTokenSource()
-        let inMemoryStorage = InMemoryStorage()
+        let inMemoryStorage = InMemoryStorage() :> IStorage
         let defaultTimerConfig = {
             Delay = 1000
             CountsNumber = 10

@@ -7,5 +7,5 @@ let processCancelTimer getProcess deleteProcess sendMessage (cancelTimer: Cancel
     match chatProcess with
     | None -> ()
     | Some chatProcess ->
-        deleteProcess chatProcess.ChatId |> ignore
+        deleteProcess chatProcess.ChatId
         sendMessage cancelTimer.Chat (List.singleton chatProcess.Starter) "С перезапуском нужно подождать" |> ignore
