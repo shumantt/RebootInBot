@@ -1,4 +1,4 @@
-module RebootInBot.Bot
+namespace RebootInBot.Bot
 
 open System
 open System.Threading

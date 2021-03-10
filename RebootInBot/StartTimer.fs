@@ -28,7 +28,7 @@ let private sendToChat sendMessage (startTimer:StartTimer) =
     sendMessage startTimer.Chat
     
 let private sendToChatWithStarter sendMessage (startTimer:StartTimer) =
-    sendMessage startTimer.Chat (startTimer.Starter |> List.singleton)
+    sendMessage startTimer.Chat (startTimer.Starter |> Seq.singleton)
 
 let processStartTimer getParticipants sendMessage updateMessage saveProcess getProcess config startTimer =
     let sendToChat = sendToChat sendMessage startTimer

@@ -1,6 +1,8 @@
-module RebootInBot.Types
+namespace RebootInBot.Types
 
 open System
+open System.Collections
+open System.Collections.Generic
 
 // BotProcessing
 type ChatId = Guid
@@ -20,14 +22,14 @@ type Message = {
     Text: MessageText
     Chat: Chat
     MessageId: MessageId
-    Commands: BotCommand list
+    Commands: IEnumerable<BotCommand>
 }
 
 type IncomingMessage = Message
 
 type IBotMessenger =
-    abstract member SendMessage: Chat -> ChatParticipant list -> string -> MessageId
-    abstract member GetParticipants: Chat -> ChatParticipant list
+    abstract member SendMessage: Chat -> IEnumerable<ChatParticipant> -> string -> MessageId
+    abstract member GetParticipants: Chat -> IEnumerable<ChatParticipant>
     abstract member UpdateMessage: Chat -> MessageId -> string -> unit
 
 // Commands processing
