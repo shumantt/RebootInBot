@@ -9,8 +9,8 @@ let private createTimerProcess sendFinished updateMessage checkIsCancelled confi
              let cancelled = checkIsCancelled ()
              if not cancelled then
                  if count > 0 then
-                    updateMessage (sprintf "Перезапуск через %i" count)
                     do! Async.Sleep config.Delay
+                    updateMessage (sprintf "Перезапуск через %i" count)
                     do! doUpdates (count - 1)
                  else
                      sendFinished "Поехали!" |> ignore      
@@ -49,7 +49,9 @@ let processStartTimer getParticipants sendMessage updateMessage saveProcess getP
     
     getParticipants startTimer.Chat
     |> buildMentionList startTimer.Starter 
-    |> fun mentions -> sendToChat mentions "Буду перезапускать, никто не против?"
+    |> fun mentions ->
+        sendToChat mentions "Буду перезапускать, никто не против?" |> ignore
+        sendToChat mentions "Начинаю обратный отсчет"
     |> fun messageId ->
         let updateMessage = updateMessage startTimer.Chat messageId
         saveProcess()

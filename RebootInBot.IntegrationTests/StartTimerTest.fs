@@ -36,13 +36,17 @@ let ``Test start timer`` () =
     updates.Count |> should equal 10
     (updates.TrueForAll (fun (c, m, _) -> c = chat && m = messageId)) |> should equal true
     
-    sent.Count |> should equal 2
+    sent.Count |> should equal 3
     
     let (firstChat, firstParticipants) = sent.[0]
     firstChat |> should equal chat
     firstParticipants |> should equal ["participant1";"participant2"]
     
-    let (secondChat, secondParticipants) = sent.[1]
+    let (secondChat, secondParticipants) = sent.[0]
     secondChat |> should equal chat
-    secondParticipants |> should equal ["author"]
+    secondParticipants |> should equal ["participant1";"participant2"]
+    
+    let (thirdChat, thirdParticipants) = sent.[2]
+    thirdChat |> should equal chat
+    thirdParticipants |> should equal ["author"]
     

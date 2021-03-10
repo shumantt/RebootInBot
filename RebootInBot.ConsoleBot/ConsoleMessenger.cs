@@ -12,7 +12,7 @@ namespace RebootInBot.ConsoleBot
         public Guid SendMessage(Chat chat, IEnumerable<string> mentions, string text)
         {
             var prefix = BuildPrefix(chat);
-            var mentionsList = string.Join(',',mentions.Select(x => $"@{x}").ToArray());
+            var mentionsList = BuildMentionsList(mentions);
             var messageText = $"{prefix}: {text} {mentionsList}";
             var messageId = Guid.NewGuid();
             var message = new ConsoleMessage(System.Console.CursorLeft, System.Console.CursorTop, messageText);
@@ -35,13 +35,14 @@ namespace RebootInBot.ConsoleBot
         {
             var newMessageText = $"{BuildPrefix(chat)}: {newText}";
             var message = messages[messageId];
-            
+
             Console.SetCursorPosition(message.Left, message.Top);
             Console.WriteLine(newMessageText.PadRight(message.Text.Length, ' '));
 
-            message.Rewrite(newMessageText);
+            messages[messageId] = message.Rewrite(newMessageText);
         }
 
         private static string BuildPrefix(Chat chat) => chat.ChatId.ToString().Substring(0, 3);
+        private static string BuildMentionsList(IEnumerable<string> mentions) => string.Join(',',mentions.Select(x => $"@{x}").ToArray());
     }
 }

@@ -54,7 +54,7 @@ let ``processStartTimer sends message and updates it N times if not cancelled`` 
     processStartTimer getParticipants sendMessage updateMessage saveProcess getProcess config startTimer
     |> Async.RunSynchronously
     
-    messageSentСount |> should equal 2
+    messageSentСount |> should equal 3
     updateCount |> should equal N
     
 [<Fact>]
@@ -91,5 +91,5 @@ let ``processStartTimer is cancelable`` () =
     processStartTimer getParticipants sendMessage updateMessage saveProcess getProcess config startTimer
     |> Async.RunSynchronously
     
-    messages.Count |> should equal 1
+    messages.Count |> should equal 2
     updateCount |> should equal canceltAt

@@ -44,9 +44,9 @@ let ``Test cancel timer`` () =
     
     updates.Count |> should lessThan 10
     
-    sent.Count |> should equal 2
-    let (secondChat, secondParticipants, secondText) = sent.[1]
-    secondChat |> should equal chat
-    secondParticipants |> should equal ["author"]
-    secondText |> should equal "С перезапуском нужно подождать"
+    sent.Count |> should equal 3
+    let (thirdChat, thirdParticipants, thirdText) = sent.[2]
+    thirdChat |> should equal chat
+    thirdParticipants |> should equal ["author"]
+    thirdText |> should equal "С перезапуском нужно подождать"
     
