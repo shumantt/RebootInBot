@@ -8,7 +8,7 @@ namespace RebootInBot.ConsoleBot
     {
         static void Main(string[] args)
         {
-            var bot = Bot.Bot.Start(new ConsoleMessenger());
+            using var bot = Bot.Bot.Start(new ConsoleMessenger());
             Console.WriteLine("Hello! It is bot. write command or /exit to exit.");
             var chat = new Chat(Guid.NewGuid());
             while (true)

@@ -30,7 +30,14 @@ let private sendToChat sendMessage (startTimer:StartTimer) =
 let private sendToChatWithStarter sendMessage (startTimer:StartTimer) =
     sendMessage startTimer.Chat (startTimer.Starter |> Seq.singleton)
 
-let processStartTimer getParticipants sendMessage updateMessage saveProcess getProcess config startTimer =
+let processStartTimer
+        getParticipants
+        sendMessage
+        updateMessage
+        saveProcess
+        getProcess
+        config
+        startTimer =
     let sendToChat = sendToChat sendMessage startTimer
     let sendToChatWithStarter = sendToChatWithStarter sendMessage startTimer
     
@@ -46,7 +53,7 @@ let processStartTimer getParticipants sendMessage updateMessage saveProcess getP
         match chatProcess with
         | Some _ -> false
         | None -> true
-    
+        
     getParticipants startTimer.Chat
     |> buildMentionList startTimer.Starter 
     |> fun mentions ->
@@ -59,3 +66,6 @@ let processStartTimer getParticipants sendMessage updateMessage saveProcess getP
         
 let processThrottled sendMessage (startTimer:StartTimer) =
     sendToChatWithStarter sendMessage startTimer "Не можем обработаь ваш запрос"
+
+let processRunning sendMessage (startTimer:StartTimer) =
+    sendToChatWithStarter sendMessage startTimer "Процесс уже запущен"

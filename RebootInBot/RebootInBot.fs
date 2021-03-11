@@ -14,12 +14,17 @@ type Bot private(messenger: IBotMessenger, storage: IStorage, processor:LongRunn
     
     let processCommand command =
         
-        let processStartTimer startTimer =
-            processor.Process(startTimer)
-            |> fun result ->
-                match result with
-                |Started -> ()
-                |Throttled -> processThrottled messenger.SendMessage startTimer |> ignore
+        let processStartTimer (startTimer:StartTimer) =
+            let chatProcess =
+                storage.GetProcess startTimer.Chat.ChatId
+            match chatProcess with
+            | Some _ -> processRunning messenger.SendMessage startTimer |> ignore
+            | None ->
+                processor.Process(startTimer)
+                |> fun result ->
+                    match result with
+                    |Started -> ()
+                    |Throttled -> processThrottled messenger.SendMessage startTimer |> ignore
     
         
         match command with
