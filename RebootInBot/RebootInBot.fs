@@ -50,6 +50,7 @@ type Bot private(messenger: IBotMessenger, storage: IStorage, processor:LongRunn
                                  messenger.UpdateMessage
                                  inMemoryStorage.SaveProcess
                                  inMemoryStorage.GetProcess
+                                 inMemoryStorage.DeleteProcess
                                  defaultTimerConfig
         let longRunningProcessor = LongRunningProcessor<StartTimer>.Start(timerProcessor, 10, cancellationTokenSource.Token)
         new Bot(messenger, inMemoryStorage, longRunningProcessor, cancellationTokenSource)

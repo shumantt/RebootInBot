@@ -3,17 +3,18 @@ module RebootInBot.StartTimer
 open RebootInBot.Types
 open RebootInBot.Mentions
 
-let private createTimerProcess sendFinished updateMessage checkIsCancelled config =
+let private createTimerProcess sendFinished updateMessage checkIsCancelled deleteProcess config =
     let rec doUpdates count =
         async {
-             let cancelled = checkIsCancelled ()
+             let cancelled = checkIsCancelled()
              if not cancelled then
                  if count > 0 then
                     do! Async.Sleep config.Delay
                     updateMessage (sprintf "Перезапуск через %i" count)
                     do! doUpdates (count - 1)
                  else
-                     sendFinished "Поехали!" |> ignore      
+                     sendFinished "Поехали!" |> ignore
+                     deleteProcess()
         }
         
     doUpdates config.CountsNumber
@@ -36,6 +37,7 @@ let processStartTimer
         updateMessage
         saveProcess
         getProcess
+        deleteProcess
         config
         startTimer =
     let sendToChat = sendToChat sendMessage startTimer
@@ -47,6 +49,8 @@ let processStartTimer
             Starter = startTimer.Starter
         }
         saveProcess chatProcess
+    let deleteProcess () =
+        deleteProcess startTimer.Chat.ChatId
     
     let checkIsCancelled () =
         let chatProcess = getProcess startTimer.Chat.ChatId
@@ -62,7 +66,7 @@ let processStartTimer
     |> fun messageId ->
         let updateMessage = updateMessage startTimer.Chat messageId
         saveProcess()
-        createTimerProcess sendToChatWithStarter updateMessage checkIsCancelled config
+        createTimerProcess sendToChatWithStarter updateMessage checkIsCancelled deleteProcess config
         
 let processThrottled sendMessage (startTimer:StartTimer) =
     sendToChatWithStarter sendMessage startTimer "Не можем обработаь ваш запрос"
