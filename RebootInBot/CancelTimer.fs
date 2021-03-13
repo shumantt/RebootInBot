@@ -35,23 +35,9 @@ type GeneralError = { Message: string }
 
 type TimerCancellationFailure = { Timer: Timer }
 
-type CancelTimer = RunningTimer -> Async<Result<InactiveTimer, GeneralError>>
+type CancelTimer = RunningTimer -> Async<Result<InactiveTimer, TimerCancellationFailure>>
 
 type CancelProcess = Timer -> CancelTimer -> Async<Result<TimerCancelled, TimerCancellationFailure>>
-
-let cancelProcess: CancelProcess =
-    fun timer cancelTimer ->
-        async {
-            match timer with
-            | RunningTimer runningTimer ->
-                let! cancelResult = cancelTimer runningTimer
-
-                match cancelResult with
-                | Ok inactiveTimer -> return Result.Ok { Timer = inactiveTimer }
-                | Error _ -> return Result.Error { Timer = timer }
-            | InactiveTimer _ -> return Result.Error { Timer = timer }
-        }
-
 
 type TimerStarted = {
     Timer: RunningTimer
@@ -61,23 +47,59 @@ type TimerStartFailure = {
     Timer: Timer
 }
 
-type StartTimerCountDownFailure =
-    | NewThrottled
-    | StartError of GeneralError
-
-type StartTimerCountDown = InactiveTimer -> Async<Result<RunningTimer, StartTimerCountDownFailure>>
+type StartTimerCountDown = InactiveTimer -> Async<Result<RunningTimer, TimerStartFailure>>
 
 type StartTimerProcess = Timer -> StartTimerCountDown -> Async<Result<TimerStarted, TimerStartFailure>>
+    
+let bindResultAsync binder value =
+    async {
+        match value with
+        | Ok result -> return! binder result
+        | Error error -> return Error error
+    }
+    
+let mapResultAsync map value =
+    async {
+        let! result = value
+        match result with
+        | Ok result -> return (map result)
+        | Error error -> return Error error
+    }
+
+let cancelProcess: CancelProcess =
+    let toRunning timer =
+        match timer with
+        | RunningTimer running -> Ok running
+        | InactiveTimer _ -> Error ({ Timer = timer } : TimerCancellationFailure)
+    
+    fun timer cancelTimer ->
+        async {
+            return! timer
+            |> toRunning
+            |> bindResultAsync cancelTimer
+            |> mapResultAsync (fun inactiveTimer -> Ok { Timer = inactiveTimer })
+        }
 
 
 let startTimerProcess: StartTimerProcess =
+    let toInactive timer = 
+        match timer with
+        | InactiveTimer inactive -> Ok inactive
+        | RunningTimer _ -> Error { Timer = timer }
+    
     fun timer startTimerCountDown ->
         async {
-            match timer with
-            | InactiveTimer inactiveTimer ->
-                let! startResult = startTimerCountDown inactiveTimer
-                match startResult with
-                | Ok runningTimer -> return Result.Ok { Timer = runningTimer }
-                | Error startCountDownFailure -> return Result.Error { Timer = timer }
-            | RunningTimer runningTimer -> return Result.Error { Timer = timer }
+           return! timer
+            |> toInactive
+            |> bindResultAsync startTimerCountDown
+            |> mapResultAsync (fun runningTimer -> Ok { Timer = runningTimer })
         }
+type MessageProcessError =
+    | TimerStartFailure of TimerStartFailure
+    | TimerCancellationFailure of TimerCancellationFailure
+        
+type MessageProcessed =
+    | TimerStarted of TimerStarted
+    | TimerCancelled of TimerCancelled
+        
+type MessageProcess = IncomingMessage -> Async<Result<MessageProcessed, MessageProcessError>>
