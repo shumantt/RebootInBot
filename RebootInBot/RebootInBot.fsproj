@@ -6,7 +6,8 @@
 
     <ItemGroup>
         <Compile Include="Types.fs" />
-        <Compile Include="Storage\InMemoryStorage.fs" />
+        <Compile Include="Helpers.fs" />
+        <Compile Include="Storage\InMemoryTimerStorage.fs" />
         <Compile Include="Processing.fs" />
         <Compile Include="Mentions.fs" />
         <Compile Include="StartTimer.fs" />

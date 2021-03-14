@@ -5,12 +5,12 @@ open RebootInBot.StartTimer
 
 let private buildCommand incomingMessage (command: BotCommand) =
     match command with
-    | "/reboot" -> Some (Command.StartTimer (buildStartTimerCommand incomingMessage))
-    | "/cancel" -> Some (Command.CancelTimer ({ Chat = incomingMessage.Chat }))
+    | "/reboot" -> Some(Command.StartTimerCommand(buildStartTimerCommand incomingMessage))
+    | "/cancel" -> Some(Command.CancelTimerCommand({ Chat = incomingMessage.Chat }))
     | _ -> None
 
-let parseCommand (incomingMessage: IncomingMessage) =
-    incomingMessage.Commands
-    |> Seq.tryHead
-    |> Option.bind (buildCommand incomingMessage)
-    
+let parseCommand: ParseCommand =
+    fun incomingMessage ->
+        incomingMessage.Commands
+        |> Seq.tryHead
+        |> Option.bind (buildCommand incomingMessage)

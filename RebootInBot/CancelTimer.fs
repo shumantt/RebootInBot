@@ -1,9 +1,9 @@
 module RebootInBot.CancelTimer
 
-open System
 open RebootInBot.Types
+open RebootInBot.Helpers
 
-let processCancelTimer getProcess deleteProcess sendMessage (cancelTimer: CancelTimer) =
+let processCancelTimer getProcess deleteProcess sendMessage (cancelTimer: CancelTimerCommand) =
     let chatProcess = getProcess cancelTimer.Chat.ChatId
 
     match chatProcess with
@@ -14,92 +14,25 @@ let processCancelTimer getProcess deleteProcess sendMessage (cancelTimer: Cancel
         sendMessage cancelTimer.Chat (List.singleton chatProcess.Starter) "С перезапуском нужно подождать"
         |> ignore
 
-
-
-
-type CancelTimerCommand = unit
-
-type TimerInfo = { Id: Guid }
-
-type RunningTimer = TimerInfo
-type InactiveTimer = TimerInfo
-
-type Timer =
-    | RunningTimer of RunningTimer
-    | InactiveTimer of InactiveTimer
-
-type TimerCancelled = { Timer: InactiveTimer }
-
-type GeneralError = { Message: string }
-
-
-type TimerCancellationFailure = { Timer: Timer }
-
-type CancelTimer = RunningTimer -> Async<Result<InactiveTimer, TimerCancellationFailure>>
-
-type CancelProcess = Timer -> CancelTimer -> Async<Result<TimerCancelled, TimerCancellationFailure>>
-
-type TimerStarted = {
-    Timer: RunningTimer
-}
-
-type TimerStartFailure = {
-    Timer: Timer
-}
-
-type StartTimerCountDown = InactiveTimer -> Async<Result<RunningTimer, TimerStartFailure>>
-
-type StartTimerProcess = Timer -> StartTimerCountDown -> Async<Result<TimerStarted, TimerStartFailure>>
-    
-let bindResultAsync binder value =
+let stopTimer (deleteTimer:RunningTimer -> Async<ActionResult>) (runningTimer:RunningTimer) : Async<Result<InactiveTimer, TimerCancellationFailure>> =
     async {
-        match value with
-        | Ok result -> return! binder result
-        | Error error -> return Error error
-    }
-    
-let mapResultAsync map value =
-    async {
-        let! result = value
-        match result with
-        | Ok result -> return (map result)
-        | Error error -> return Error error
+        let! deleteResult = deleteTimer runningTimer
+        match deleteResult with
+        | Success -> return Ok runningTimer
+        | Fail -> return Error({ Timer = runningTimer }: TimerCancellationFailure)
     }
 
-let cancelProcess: CancelProcess =
+let cancelProcess: CancelTimerProcess =
     let toRunning timer =
         match timer with
         | RunningTimer running -> Ok running
-        | InactiveTimer _ -> Error ({ Timer = timer } : TimerCancellationFailure)
-    
-    fun timer cancelTimer ->
-        async {
-            return! timer
-            |> toRunning
-            |> bindResultAsync cancelTimer
-            |> mapResultAsync (fun inactiveTimer -> Ok { Timer = inactiveTimer })
-        }
+        | InactiveTimer inactiveTimer -> Error({ Timer = inactiveTimer }: TimerCancellationFailure)
 
-
-let startTimerProcess: StartTimerProcess =
-    let toInactive timer = 
-        match timer with
-        | InactiveTimer inactive -> Ok inactive
-        | RunningTimer _ -> Error { Timer = timer }
-    
-    fun timer startTimerCountDown ->
+    fun getTimer stopTimer cancelTimerCommand ->
         async {
-           return! timer
-            |> toInactive
-            |> bindResultAsync startTimerCountDown
-            |> mapResultAsync (fun runningTimer -> Ok { Timer = runningTimer })
+            return!
+                getTimer (cancelTimerCommand.Chat |> toTimerId)
+                |> mapAsync toRunning
+                |> bindAsyncResultAsync stopTimer 
+                |> mapAsyncResult (fun inactiveTimer -> { Timer = inactiveTimer })
         }
-type MessageProcessError =
-    | TimerStartFailure of TimerStartFailure
-    | TimerCancellationFailure of TimerCancellationFailure
-        
-type MessageProcessed =
-    | TimerStarted of TimerStarted
-    | TimerCancelled of TimerCancelled
-        
-type MessageProcess = IncomingMessage -> Async<Result<MessageProcessed, MessageProcessError>>
