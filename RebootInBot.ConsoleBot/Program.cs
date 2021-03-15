@@ -28,7 +28,7 @@ namespace RebootInBot.ConsoleBot
                 var commands = input.Split(" ").Where(s => s.StartsWith("/"));
 
                 var message = new Message("Andrey", input, chat, Guid.NewGuid(), commands);
-                bot.ProcessMessage(message);
+                var a= bot.ProcessMessage(message);
             }
         }
     }

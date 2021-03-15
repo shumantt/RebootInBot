@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using RebootInBot.Types;
 
 namespace RebootInBot.ConsoleBot
@@ -9,7 +10,7 @@ namespace RebootInBot.ConsoleBot
     {
         private Dictionary<Guid, ConsoleMessage> messages = new Dictionary<Guid, ConsoleMessage>();
         
-        public Guid SendMessage(Chat chat, IEnumerable<string> mentions, string text)
+        public Task<Guid> SendMessage(Chat chat, IEnumerable<string> mentions, string text)
         {
             var prefix = BuildPrefix(chat);
             var mentionsList = BuildMentionsList(mentions);
@@ -18,7 +19,7 @@ namespace RebootInBot.ConsoleBot
             var message = new ConsoleMessage(System.Console.CursorLeft, System.Console.CursorTop, messageText);
             messages.Add(messageId, message);
             Console.WriteLine(messageText);
-            return messageId;
+            return Task.FromResult(messageId);
         }
 
         public IEnumerable<string> GetParticipants(Chat chat)

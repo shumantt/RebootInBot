@@ -32,6 +32,15 @@ let mapAsyncResult map asyncResult =
         | Ok ok -> return Ok(map ok)
         | Error error -> return Error error
     }
+    
+let mapAsyncError map asyncResult =
+    async {
+        let! result = asyncResult
+
+        match result with
+        | Ok ok -> return Ok ok
+        | Error error -> return Error (map error)
+    }
 
 let mapAsync map value =
     async {

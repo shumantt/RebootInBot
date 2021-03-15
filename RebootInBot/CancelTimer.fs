@@ -3,26 +3,19 @@ module RebootInBot.CancelTimer
 open RebootInBot.Types
 open RebootInBot.Helpers
 
-let processCancelTimer getProcess deleteProcess sendMessage (cancelTimer: CancelTimerCommand) =
-    let chatProcess = getProcess cancelTimer.Chat.ChatId
-
-    match chatProcess with
-    | None -> ()
-    | Some chatProcess ->
-        deleteProcess chatProcess.ChatId
-
-        sendMessage cancelTimer.Chat (List.singleton chatProcess.Starter) "С перезапуском нужно подождать"
-        |> ignore
-
-let stopTimer (deleteTimer:RunningTimer -> Async<ActionResult>) (runningTimer:RunningTimer) : Async<Result<InactiveTimer, TimerCancellationFailure>> =
+let stopTimer (deleteTimer:RunningTimer -> Async<ActionResult>) (runningTimer:RunningTimer) : Async<Result<StoppedTimer, TimerCancellationFailure>> =
     async {
         let! deleteResult = deleteTimer runningTimer
+        let inactiveTimer = { Id = runningTimer.Id }
         match deleteResult with
-        | Success -> return Ok runningTimer
-        | Fail -> return Error({ Timer = runningTimer }: TimerCancellationFailure)
+        | Success -> return Ok {
+            Timer = inactiveTimer
+            Chat = runningTimer.Chat
+            Starter = runningTimer.Starter }
+        | Fail -> return Error({ Timer = inactiveTimer }: TimerCancellationFailure)
     }
 
-let cancelProcess: CancelTimerProcess =
+let cancelTimerProcess: CancelTimerProcess =
     let toRunning timer =
         match timer with
         | RunningTimer running -> Ok running
@@ -34,5 +27,13 @@ let cancelProcess: CancelTimerProcess =
                 getTimer (cancelTimerCommand.Chat |> toTimerId)
                 |> mapAsync toRunning
                 |> bindAsyncResultAsync stopTimer 
-                |> mapAsyncResult (fun inactiveTimer -> { Timer = inactiveTimer })
+                |> mapAsyncResult (fun stoppedTimer -> { Timer = stoppedTimer.Timer
+                                                         Chat = stoppedTimer.Chat
+                                                         Starter = stoppedTimer.Starter })
         }
+        
+let processTimerCancelled (sendMessage:SendMessage) (timerCancelled: TimerCancelled) =
+    async {
+        let! _ = sendMessage timerCancelled.Chat (List.singleton timerCancelled.Starter) "С перезапуском нужно подождать" 
+        ()
+    }

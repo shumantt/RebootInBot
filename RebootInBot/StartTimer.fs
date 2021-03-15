@@ -1,75 +1,8 @@
 module RebootInBot.StartTimer
 
-open System
 open RebootInBot.Types
 open RebootInBot.Helpers
 open RebootInBot.Mentions
-
-let private createTimerProcess sendFinished updateMessage checkIsCancelled deleteProcess config =
-    let rec doUpdates count =
-        async {
-            let cancelled = checkIsCancelled ()
-
-            if not cancelled then
-                if count > 0 then
-                    do! Async.Sleep config.Delay
-                    updateMessage (sprintf "Перезапуск через %i" count)
-                    do! doUpdates (count - 1)
-                else
-                    sendFinished "Поехали!" |> ignore
-                    deleteProcess ()
-        }
-
-    doUpdates config.CountsNumber
-
-let buildStartTimerCommand (message: IncomingMessage): StartTimerCommand =
-    { Chat = message.Chat
-      Starter = message.Author }
-
-let private sendToChat sendMessage (startTimer: StartTimerCommand) = sendMessage startTimer.Chat
-
-let private sendToChatWithStarter sendMessage (startTimer: StartTimerCommand) =
-    sendMessage startTimer.Chat (startTimer.Starter |> Seq.singleton)
-
-let processStartTimer getParticipants sendMessage updateMessage saveProcess getProcess deleteProcess config startTimer =
-    let sendToChat = sendToChat sendMessage startTimer
-
-    let sendToChatWithStarter =
-        sendToChatWithStarter sendMessage startTimer
-
-    let saveProcess () =
-        let chatProcess =
-            { ChatId = startTimer.Chat.ChatId
-              Starter = startTimer.Starter }
-
-        saveProcess chatProcess
-
-    let deleteProcess () = deleteProcess startTimer.Chat.ChatId
-
-    let checkIsCancelled () =
-        let chatProcess = getProcess startTimer.Chat.ChatId
-
-        match chatProcess with
-        | Some _ -> false
-        | None -> true
-
-    getParticipants startTimer.Chat
-    |> buildMentionList startTimer.Starter
-    |> fun mentions ->
-        sendToChat mentions "Буду перезапускать, никто не против?"
-        |> ignore
-
-        sendToChat mentions "Начинаю обратный отсчет"
-    |> fun messageId ->
-        let updateMessage = updateMessage startTimer.Chat messageId
-        saveProcess ()
-        createTimerProcess sendToChatWithStarter updateMessage checkIsCancelled deleteProcess config
-
-let processThrottled sendMessage (startTimer: StartTimerCommand) =
-    sendToChatWithStarter sendMessage startTimer "Не можем обработаь ваш запрос"
-
-let processRunning sendMessage (startTimer: StartTimerCommand) =
-    sendToChatWithStarter sendMessage startTimer "Процесс уже запущен"
 
 let countDown (sendMessage: SendMessage)
               (updateMessage: UpdateMessage)
@@ -77,7 +10,7 @@ let countDown (sendMessage: SendMessage)
               (getTimer: GetTimer)
               (stopTimer: StopTimer)
               (config: TimerConfig)
-              (runningTimer: RunningTimer, startTimerCommand: StartTimerCommand)
+              (runningTimer: RunningTimer)
               =
     let rec doUpdates count messageId =
         async {
@@ -88,7 +21,7 @@ let countDown (sendMessage: SendMessage)
                 match count with
                 | n when n >= 0 ->
                     do! Async.Sleep config.Delay
-                    do! updateMessage startTimerCommand.Chat messageId (sprintf "Перезапуск через %i" count)
+                    do! updateMessage runningTimer.Chat messageId (sprintf "Перезапуск через %i" count)
                     do! doUpdates (count - 1) messageId
                 | _ -> ()
             | _ -> ()
@@ -96,59 +29,74 @@ let countDown (sendMessage: SendMessage)
 
     async {
         let! messageId =
-            getParticipants startTimerCommand.Chat
-            |> mapAsync (buildMentionList startTimerCommand.Starter)
+            getParticipants runningTimer.Chat
+            |> mapAsync (buildMentionList runningTimer.Starter)
             |> bindAsync (fun mentions ->
                 async {
-                    let! _ = sendMessage startTimerCommand.Chat mentions "Буду перезапускать, никто не против?"
-                    return! sendMessage startTimerCommand.Chat mentions "Начинаю обратный отсчет"
+                    let! _ = sendMessage runningTimer.Chat mentions "Буду перезапускать, никто не против?"
+                    return! sendMessage runningTimer.Chat mentions "Начинаю обратный отсчет"
                 })
 
         do! (doUpdates config.CountsNumber messageId)
-        let! _ = sendMessage startTimerCommand.Chat (Seq.singleton startTimerCommand.Starter) "Поехали!"
+        let! _ = sendMessage runningTimer.Chat (Seq.singleton runningTimer.Starter) "Поехали!"
         let! stopResult = stopTimer runningTimer
+
         match stopResult with
         | Ok _ -> ()
         | Error _ -> failwith "Can't stop timer"
     }
 
 
-let startTimer (saveTimer: InactiveTimer -> Async<ActionResult>)
+let startTimer (saveTimer: RunningTimer -> Async<ActionResult>)
+               (startTimerCommand: StartTimerCommand)
                (inactiveTimer: InactiveTimer)
-               : Async<Result<RunningTimer, TimerStartFailure>> =
+               : Async<Result<RunningTimer, StartError>> =
     async {
-        let! saveTimerResult = saveTimer inactiveTimer
+        let runningTimer =
+            { Id = inactiveTimer.Id
+              Chat = startTimerCommand.Chat
+              Starter = startTimerCommand.Starter }
+
+        let! saveTimerResult = saveTimer runningTimer
 
         match saveTimerResult with
-        | Success -> return Ok { Id = inactiveTimer.Id }
-        | Fail -> return Error { Timer = inactiveTimer }
+        | Success -> return Ok runningTimer
+        | Fail -> return Error StartError.SaveError
     }
 
-let startTimerCountDown (startTimer: StartTimer)
-                        (startLongRunningProcess: StartLongRunningProcess<RunningTimer * StartTimerCommand>)
-                        (startTimerCommand: StartTimerCommand)
-                        (inactiveTimer: InactiveTimer)
-                        : Async<Result<RunningTimer, TimerStartFailure>> =
-    async {
-        return!
-            startTimer inactiveTimer
-            |> bindAsyncResult (fun runningTimer ->
-                match startLongRunningProcess (runningTimer, startTimerCommand) with
-                | Started -> Ok runningTimer
-                | Throttled -> Error({ Timer = runningTimer }))
-    }
+let startTimerCountDown startLongRunningTask runningTimer =
+    match startLongRunningTask runningTimer with
+    | Started -> Ok runningTimer
+    | Throttled -> Error StartError.Throttled
 
 let startTimerProcess: StartTimerProcess =
     let toInactive timer =
         match timer with
         | InactiveTimer inactive -> Ok inactive
-        | RunningTimer runningTimer -> Error { Timer = runningTimer }
-    
-    fun getTimer startTimerCountDown startTimerCommand ->
+        | RunningTimer _ -> Error StartError.AlreadyRunning
+
+    fun getTimer startTimer startTimerCountDown startTimerCommand ->
         async {
             return!
                 getTimer (startTimerCommand.Chat |> toTimerId)
                 |> mapAsync toInactive
-                |> bindAsyncResultAsync (startTimerCountDown startTimerCommand)
+                |> bindAsyncResultAsync (startTimer startTimerCommand)
+                |> bindAsyncResult startTimerCountDown
                 |> mapAsyncResult (fun runningTimer -> { Timer = runningTimer })
+                |> mapAsyncError (fun error ->
+                    { Chat = startTimerCommand.Chat
+                      Starter = startTimerCommand.Starter
+                      Error = error })
         }
+
+let processStartError (sendMessage: SendMessage) (error: TimerStartFailure) =
+    async {
+        match error.Error with
+        | StartError.Throttled ->
+            let! _ =
+                sendMessage error.Chat (Seq.singleton error.Starter) "Пока не можем запустить отсчет, попробуйте позже"
+
+            ()
+        | _ -> ()
+
+    }

@@ -2,6 +2,7 @@ namespace RebootInBot.Types
 
 open System
 open System.Collections.Generic
+open System.Threading.Tasks
 
 // BotProcessing
 type ChatId = Guid
@@ -33,9 +34,9 @@ type UpdateMessage = Chat -> MessageId -> string -> Async<unit>
 
 
 type IBotMessenger =
-    abstract member SendMessage: Chat -> IEnumerable<ChatParticipant> -> string -> MessageId
-    abstract member GetParticipants: Chat -> IEnumerable<ChatParticipant>
-    abstract member UpdateMessage: Chat -> MessageId -> string -> unit
+    abstract member SendMessage: Chat -> IEnumerable<ChatParticipant> -> string -> Task<MessageId>
+    abstract member GetParticipants: Chat -> Task<IEnumerable<ChatParticipant>>
+    abstract member UpdateMessage: Chat -> MessageId -> string -> Task
 
 // Process
 type Process = {
@@ -67,9 +68,15 @@ type MessageProcess = IncomingMessage -> Async<unit>
 
 type TimerId = Guid
 
-type TimerInfo = { Id: TimerId }
+type TimerInfo = {
+    Id: TimerId
+}
 
-type RunningTimer = TimerInfo
+type RunningTimer = {
+    Id: TimerId
+    Chat: Chat
+    Starter: ChatParticipant
+}
 
 type InactiveTimer = TimerInfo
 
@@ -79,7 +86,11 @@ type Timer =
 
 type GetTimer = TimerId -> Async<Timer>
 
-type TimerCancelled = { Timer: InactiveTimer }
+type TimerCancelled = {
+    Timer: InactiveTimer
+    Chat: Chat
+    Starter: ChatParticipant
+}
 
 type GeneralError = { Message: string }
 
@@ -90,29 +101,48 @@ type ActionResult =
     | Success
     | Fail
 
-type StopTimerError = string
+type StoppedTimer = {
+    Timer: InactiveTimer
+    Chat: Chat
+    Starter: ChatParticipant
+}
 
-type StopTimer = RunningTimer -> Async<Result<InactiveTimer, TimerCancellationFailure>> 
+type StopTimer = RunningTimer -> Async<Result<StoppedTimer, TimerCancellationFailure>> 
 
-type CancelTimerProcess = GetTimer -> StopTimer -> CancelTimerCommand -> Async<Result<TimerCancelled, TimerCancellationFailure>>
+type CancelTimerProcessResult = Result<TimerCancelled, TimerCancellationFailure>
+
+type CancelTimerProcess = GetTimer -> StopTimer -> CancelTimerCommand -> Async<CancelTimerProcessResult>
 
 type TimerStarted = {
     Timer: RunningTimer
 }
 
+type StartError =
+    | Throttled
+    | SaveError
+    | AlreadyRunning
+
 type TimerStartFailure = {
-    Timer: TimerInfo
+    Chat: Chat
+    Starter: ChatParticipant
+    Error: StartError
 }
 
-type StartTimer = InactiveTimer -> Async<Result<RunningTimer, TimerStartFailure>>
+type StartTimer = StartTimerCommand -> InactiveTimer -> Async<Result<RunningTimer, StartError>>
 
-type StartTimerCountDown = StartTimerCommand -> InactiveTimer -> Async<Result<RunningTimer, TimerStartFailure>>
+type StartTimerCountDown = RunningTimer -> Result<RunningTimer, StartError>
 
 type CountDown = GetTimer -> RunningTimer -> Async<unit>
 
-type StartTimerProcess = GetTimer -> StartTimerCountDown -> StartTimerCommand -> Async<Result<TimerStarted, TimerStartFailure>>
+type StartTimerProcessResult = Result<TimerStarted, TimerStartFailure>
+
+type StartTimerProcess = GetTimer -> StartTimer -> StartTimerCountDown -> StartTimerCommand -> Async<StartTimerProcessResult>
 
 // workflows
+
+type CommandProcessResult =
+    | StartTimerProcessResult of StartTimerProcessResult
+    | CancelTimerProcessResult of CancelTimerProcessResult
 
 type MessageProcessError =
     | TimerStartFailure of TimerStartFailure
@@ -150,6 +180,6 @@ type TimerConfig = {
 }
 
 type ITimerStorage =
-    abstract member Save: InactiveTimer -> Async<ActionResult>
+    abstract member Save: RunningTimer -> Async<ActionResult>
     abstract member Get: TimerId -> Async<Timer>
     abstract member Delete: RunningTimer -> Async<ActionResult>

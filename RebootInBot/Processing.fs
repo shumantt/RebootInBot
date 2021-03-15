@@ -5,7 +5,7 @@ open System.Threading
 open RebootInBot.Types
 
 type LongRunningProcessor<'a> private (longRunningWorker: MailboxProcessor<WorkQueueItem<'a>>) =
-    member this.Process(workData) =
+    member this.StartLongRunningTask(workData) =
         longRunningWorker.PostAndReply(fun rc -> WorkQueueItem.Work {
             WorkData = workData
             ReplyChannel = rc

@@ -5,7 +5,7 @@ open RebootInBot.Types
 open RebootInBot.Helpers
 
 type InMemoryTimerStorage() =
-    let processesStorage = Dictionary<TimerId, TimerInfo>()
+    let processesStorage = Dictionary<TimerId, RunningTimer>()
     
     let toId (chat:Chat) =
         chat.ChatId
@@ -15,8 +15,8 @@ type InMemoryTimerStorage() =
             processesStorage.Add(timer.Id, timer)
             liftAsync ActionResult.Success
         
-        member this.Get(chat) =
-            let found, timer = processesStorage.TryGetValue (chat |> toId)
+        member this.Get(timerId) =
+            let found, timer = processesStorage.TryGetValue (timerId)
             if(found) then
                 liftAsync (Timer.RunningTimer timer)
             else
