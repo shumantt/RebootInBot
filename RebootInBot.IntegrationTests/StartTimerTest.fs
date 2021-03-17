@@ -1,6 +1,7 @@
 module RebootInBot.IntegrationTests.StartTimerTest
 
 open System
+open System.Threading.Tasks
 open Xunit
 open FsUnit
 open RebootInBot.Types
@@ -14,10 +15,11 @@ let ``Test start timer`` () =
     let messageId = Guid.NewGuid()
     let onUpdate chat messageId text =
         updates.Add (chat, messageId, text)
-    let onSend (chat, participants, _) =
-        sent.Add (chat, participants)
-        messageId
-    let messenger = MockMessenger(onSend, onUpdate, ["author";"participant1";"participant2"])
+        Task.CompletedTask
+    let onSend (chat, participants, text) =
+        sent.Add (chat, participants, text)
+        Task.FromResult(messageId)
+    let messenger = MockMessenger(onSend, onUpdate, ["author";"participant1";"participant2"] |> List.toSeq)
     let chat = { ChatId = Guid.NewGuid() }
     let author = "author"
     let message: IncomingMessage =
@@ -29,24 +31,24 @@ let ``Test start timer`` () =
     
     use bot = Bot.Start(messenger)
     
-    bot.ProcessMessage(message)
+    bot.ProcessMessage(message) |> Async.AwaitTask |> Async.RunSynchronously
     
-    Async.Sleep(11_000) |> Async.RunSynchronously
+    Async.Sleep(12_000) |> Async.RunSynchronously
     
-    updates.Count |> should equal 10
+    updates.Count |> should equal 11
     (updates.TrueForAll (fun (c, m, _) -> c = chat && m = messageId)) |> should equal true
     
     sent.Count |> should equal 3
     
-    let (firstChat, firstParticipants) = sent.[0]
+    let (firstChat, firstParticipants, _) = sent.[0]
     firstChat |> should equal chat
     firstParticipants |> should equal ["participant1";"participant2"]
     
-    let (secondChat, secondParticipants) = sent.[0]
+    let (secondChat, secondParticipants, _) = sent.[0]
     secondChat |> should equal chat
     secondParticipants |> should equal ["participant1";"participant2"]
     
-    let (thirdChat, thirdParticipants) = sent.[2]
+    let (thirdChat, thirdParticipants, _) = sent.[2]
     thirdChat |> should equal chat
     thirdParticipants |> should equal ["author"]
     

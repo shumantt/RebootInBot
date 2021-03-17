@@ -1,6 +1,7 @@
 module RebootInBot.IntegrationTests.Mocks.MockMessenger
 
 open System
+open System.Threading.Tasks
 open RebootInBot.Types
 
 type MockMessenger(onSend, onUpdate, participants) =
@@ -9,7 +10,7 @@ type MockMessenger(onSend, onUpdate, participants) =
             onSend(chat, chatParticipants, text)
 
         member this.GetParticipants(chat) =
-            participants
+            Task.FromResult(participants)
         
         member this.UpdateMessage(chat) (messageId) (text) =
             onUpdate chat messageId text    

@@ -8,8 +8,8 @@ namespace RebootInBot.ConsoleBot
 {
     public class ConsoleMessenger : IBotMessenger
     {
-        private Dictionary<Guid, ConsoleMessage> messages = new Dictionary<Guid, ConsoleMessage>();
-        
+        private readonly Dictionary<Guid, ConsoleMessage> messages = new Dictionary<Guid, ConsoleMessage>();
+
         public Task<Guid> SendMessage(Chat chat, IEnumerable<string> mentions, string text)
         {
             var prefix = BuildPrefix(chat);
@@ -22,17 +22,17 @@ namespace RebootInBot.ConsoleBot
             return Task.FromResult(messageId);
         }
 
-        public IEnumerable<string> GetParticipants(Chat chat)
+        public Task<IEnumerable<string>> GetParticipants(Chat chat)
         {
-            return new[]
+            return Task.FromResult(new[]
             {
                 "Andrey",
                 "Ivan",
                 "Other"
-            };
+            }.AsEnumerable());
         }
 
-        public void UpdateMessage(Chat chat, Guid messageId, string newText)
+        public Task UpdateMessage(Chat chat, Guid messageId, string newText)
         {
             var newMessageText = $"{BuildPrefix(chat)}: {newText}";
             var message = messages[messageId];
@@ -41,9 +41,12 @@ namespace RebootInBot.ConsoleBot
             Console.WriteLine(newMessageText.PadRight(message.Text.Length, ' '));
 
             messages[messageId] = message.Rewrite(newMessageText);
+            return Task.CompletedTask;
         }
 
         private static string BuildPrefix(Chat chat) => chat.ChatId.ToString().Substring(0, 3);
-        private static string BuildMentionsList(IEnumerable<string> mentions) => string.Join(',',mentions.Select(x => $"@{x}").ToArray());
+
+        private static string BuildMentionsList(IEnumerable<string> mentions) =>
+            string.Join(',', mentions.Select(x => $"@{x}").ToArray());
     }
 }

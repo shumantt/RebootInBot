@@ -22,7 +22,7 @@ let ``parseCommand should return StartTimer on /reboot command`` () =
     
     let actual = parseCommand message
     
-    actual |> should equal (Some (Command.StartTimer expected) )
+    actual |> should equal (Some (Command.StartTimerCommand expected) )
 
 [<Fact>]
 let ``parseCommand should return CancelTimer on /cancel command`` () =
@@ -39,7 +39,7 @@ let ``parseCommand should return CancelTimer on /cancel command`` () =
     
     let actual = parseCommand message
     
-    actual |> should equal (Some (Command.CancelTimer expected) )
+    actual |> should equal (Some (Command.CancelTimerCommand expected) )
 
 [<Fact>]    
 let ``parseCommand should return None on unknown command`` () =

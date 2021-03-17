@@ -1,6 +1,7 @@
 module RebootInBot.IntegrationTests.CancelTimerTest
 
 open System
+open System.Threading.Tasks
 open RebootInBot.Bot
 open RebootInBot.IntegrationTests.Mocks.MockMessenger
 open RebootInBot.Types
@@ -14,9 +15,10 @@ let ``Test cancel timer`` () =
     let messageId = Guid.NewGuid()
     let onUpdate chat messageId text =
         updates.Add (chat, messageId, text)
+        Task.CompletedTask
     let onSend (chat, participants, text) =
         sent.Add (chat, participants, text)
-        messageId
+        Task.FromResult(messageId)
     let messenger = MockMessenger(onSend, onUpdate, ["author";"participant1";"participant2"])
     let chat = { ChatId = Guid.NewGuid() }
     let author = "author"
