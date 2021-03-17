@@ -4,7 +4,7 @@ using RebootInBot.Types;
 
 namespace RebootInBot.ConsoleBot
 {
-    class Program
+    public class Program
     {
         static void Main(string[] args)
         {

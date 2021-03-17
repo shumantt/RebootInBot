@@ -16,7 +16,7 @@ namespace RebootInBot.ConsoleBot
             var mentionsList = BuildMentionsList(mentions);
             var messageText = $"{prefix}: {text} {mentionsList}";
             var messageId = Guid.NewGuid();
-            var message = new ConsoleMessage(System.Console.CursorLeft, System.Console.CursorTop, messageText);
+            var message = new ConsoleMessage(Console.CursorLeft, Console.CursorTop, messageText);
             messages.Add(messageId, message);
             Console.WriteLine(messageText);
             return Task.FromResult(messageId);

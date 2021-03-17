@@ -38,11 +38,11 @@ let ``Test cancel timer`` () =
     
     use bot = Bot.Start(messenger)
     
-    bot.ProcessMessage(startTimerMessage)
+    bot.ProcessMessage(startTimerMessage) |> Async.AwaitTask |> Async.RunSynchronously
     
     Async.Sleep(5_000) |> Async.RunSynchronously
     
-    bot.ProcessMessage(cancelTimerMessage)
+    bot.ProcessMessage(cancelTimerMessage) |> Async.AwaitTask |> Async.RunSynchronously
     
     updates.Count |> should lessThan 10
     
