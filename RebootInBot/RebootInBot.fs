@@ -6,33 +6,25 @@ open RebootInBot
 open RebootInBot.Storage.InMemoryStorage
 open RebootInBot.Types
 open RebootInBot.Processing
+open RebootInBot.Extensions
 
+type Bot(messenger: IBotMessenger, storage: ITimerStorage, timerConfig: TimerConfig) =
+    let cts = new CancellationTokenSource()
+    let stopTimer: StopTimer = CancelTimer.stopTimer storage.Delete
+    let startTimer: StartTimer = StartTimer.startTimer storage.Save
+    let countDown =
+        StartTimer.countDown
+            messenger.SendMessageAsync
+            messenger.UpdateMessageAsync
+            messenger.GetParticipantsAsync
+            storage.Get
+            stopTimer
+            timerConfig
+    let longRunningProcessor = LongRunningProcessor<RunningTimer>.Start(countDown, 10, cts.Token)
+    let cancelTimerProcess = CancelTimer.cancelTimerProcess storage.Get stopTimer
+    let startTimerCountDown: StartTimerCountDown = StartTimer.startTimerCountDown longRunningProcessor.StartLongRunningTask
+    let startTimerProcess = StartTimer.startTimerProcess storage.Get startTimer startTimerCountDown
 
-type Bot private (messenger: IBotMessenger,
-                  storage: ITimerStorage,
-                  processor: LongRunningProcessor<RunningTimer>,
-                  cts: CancellationTokenSource) =
-
-    let sendMessage: SendMessage =
-        fun chat participants text ->
-            messenger.SendMessage chat participants text
-            |> Async.AwaitTask
-    
-    let stopTimer : StopTimer =
-        CancelTimer.stopTimer storage.Delete
-    
-    let cancelTimerProcess =
-        CancelTimer.cancelTimerProcess storage.Get stopTimer
-
-    let startTimer: StartTimer =
-        StartTimer.startTimer storage.Save
-    
-    let startTimerCountDown: StartTimerCountDown =
-        StartTimer.startTimerCountDown processor.StartLongRunningTask
-    
-    let startTimerProcess =
-        StartTimer.startTimerProcess storage.Get startTimer startTimerCountDown
-    
     let processCommand command =
         let getResult command =
             async {
@@ -44,21 +36,21 @@ type Bot private (messenger: IBotMessenger,
                     let! cancelResult = cancelTimerProcess cancelTimerCommand
                     return CommandProcessResult.CancelTimerProcessResult cancelResult
             }
-        
+
         async {
             let! result = getResult command
+
             match result with
             | StartTimerProcessResult startTimerProcessResult ->
                 match startTimerProcessResult with
                 | Ok _ -> ()
-                | Error error -> do! StartTimer.processStartError sendMessage error
+                | Error error -> do! StartTimer.processStartError messenger.SendMessageAsync error
             | CancelTimerProcessResult cancelTimerProcessResult ->
                 match cancelTimerProcessResult with
-                | Ok timerCancelled -> do! CancelTimer.processTimerCancelled sendMessage timerCancelled
+                | Ok timerCancelled -> do! CancelTimer.processTimerCancelled messenger.SendMessageAsync timerCancelled
                 | Error _ -> ()
         }
-       
-    
+
     let processMessage (message: IncomingMessage) =
         async {
             match Commands.parseCommand message with
@@ -66,48 +58,14 @@ type Bot private (messenger: IBotMessenger,
             | Some command -> do! processCommand command
         }
 
-    member this.ProcessMessage(message: IncomingMessage) =
-        processMessage message
-        |> Async.StartAsTask
-
+    member this.ProcessMessage(message: IncomingMessage) = processMessage message |> Async.StartAsTask
 
     static member Start(messenger: IBotMessenger) =
-        let cancellationTokenSource = new CancellationTokenSource()
         let inMemoryStorage = InMemoryTimerStorage() :> ITimerStorage
         let defaultTimerConfig = { Delay = 1000; CountsNumber = 10 }
-
-        let sendMessage: SendMessage =
-            fun chat participants text ->
-                messenger.SendMessage chat participants text
-                |> Async.AwaitTask
-                
-        let updateMessage: UpdateMessage =
-            fun chat messageId text ->
-                messenger.UpdateMessage chat messageId text
-                |> Async.AwaitTask
-        
-        let getParticipants: GetParticipants =
-            fun chat ->
-                messenger.GetParticipants chat
-                |> Async.AwaitTask
-        let stopTimer : StopTimer =
-            CancelTimer.stopTimer inMemoryStorage.Delete
-        
-        let countDown =
-            StartTimer.countDown
-                sendMessage
-                updateMessage
-                getParticipants
-                inMemoryStorage.Get
-                stopTimer
-                defaultTimerConfig
-
-        let longRunningProcessor = LongRunningProcessor<RunningTimer>.Start(countDown, 10, cancellationTokenSource.Token)
-
-        new Bot(messenger, inMemoryStorage, longRunningProcessor, cancellationTokenSource)
-
+        new Bot(messenger, inMemoryStorage, defaultTimerConfig)
 
     interface IDisposable with
         member x.Dispose() =
-            (processor :> IDisposable).Dispose()
+            (longRunningProcessor :> IDisposable).Dispose()
             cts.Cancel()

@@ -4,6 +4,10 @@ open RebootInBot.Types
 open RebootInBot.Helpers
 open RebootInBot.Mentions
 
+let buildStartTimerCommand (message: IncomingMessage) =
+    { Chat = message.Chat
+      Starter = message.Author }
+
 let countDown (sendMessage: SendMessage)
               (updateMessage: UpdateMessage)
               (getParticipants: GetParticipants)

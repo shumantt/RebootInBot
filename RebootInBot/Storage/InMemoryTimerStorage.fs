@@ -20,7 +20,7 @@ type InMemoryTimerStorage() =
             if(found) then
                 liftAsync (Timer.RunningTimer timer)
             else
-                liftAsync (Timer.InactiveTimer timer)
+                liftAsync (Timer.InactiveTimer { Id = timerId })
             
         member this.Delete(timer) =
             match (processesStorage.Remove timer.Id) with

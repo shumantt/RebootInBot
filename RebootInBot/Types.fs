@@ -10,6 +10,7 @@ type ChatId = Guid
 type Chat = {
     ChatId: ChatId
 }
+
 type MessageAuthor = unit
 type MessageText = string
 type MessageId = Guid

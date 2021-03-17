@@ -1,11 +1,10 @@
 module RebootInBot.Commands
 
 open RebootInBot.Types
-open RebootInBot.StartTimer
 
 let private buildCommand incomingMessage (command: BotCommand) =
     match command with
-    | "/reboot" -> Some(Command.StartTimerCommand(buildStartTimerCommand incomingMessage))
+    | "/reboot" -> Some(Command.StartTimerCommand(StartTimer.buildStartTimerCommand incomingMessage))
     | "/cancel" -> Some(Command.CancelTimerCommand({ Chat = incomingMessage.Chat }))
     | _ -> None
 
