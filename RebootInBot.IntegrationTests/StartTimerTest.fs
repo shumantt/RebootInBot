@@ -1,6 +1,5 @@
 module RebootInBot.IntegrationTests.StartTimerTest
 
-open System
 open System.Threading.Tasks
 open Xunit
 open FsUnit
@@ -12,22 +11,22 @@ open RebootInBot.IntegrationTests.Mocks.MockMessenger
 let ``Test start timer`` () =
     let sent = ResizeArray([])
     let updates = ResizeArray([])
-    let messageId = Guid.NewGuid()
+    let messageId = MessageId 106L
     let onUpdate chat messageId text =
         updates.Add (chat, messageId, text)
         Task.CompletedTask
     let onSend (chat, participants, text) =
         sent.Add (chat, participants, text)
         Task.FromResult(messageId)
-    let messenger = MockMessenger(onSend, onUpdate, ["author";"participant1";"participant2"] |> List.toSeq)
-    let chat = { ChatId = Guid.NewGuid() }
-    let author = "author"
+    let messenger = MockMessenger(onSend, onUpdate, [ChatParticipant "author"; ChatParticipant "participant1"; ChatParticipant "participant2"] |> List.toSeq)
+    let chat = { ChatId = ChatId 108L }
+    let author = ChatParticipant "author"
     let message: IncomingMessage =
         { Chat = chat
           Author = author
           Text = "text"
-          MessageId = Guid.NewGuid()
-          Commands = [ "/reboot" ] }
+          MessageId = MessageId 924L
+          Commands = [ BotCommand "/reboot" ] }
     
     use bot = Bot.Start(messenger)
     
@@ -42,13 +41,13 @@ let ``Test start timer`` () =
     
     let (firstChat, firstParticipants, _) = sent.[0]
     firstChat |> should equal chat
-    firstParticipants |> should equal ["participant1";"participant2"]
+    firstParticipants |> should equal [ChatParticipant "participant1"; ChatParticipant "participant2"]
     
     let (secondChat, secondParticipants, _) = sent.[0]
     secondChat |> should equal chat
-    secondParticipants |> should equal ["participant1";"participant2"]
+    secondParticipants |> should equal [ChatParticipant "participant1"; ChatParticipant "participant2"]
     
     let (thirdChat, thirdParticipants, _) = sent.[2]
     thirdChat |> should equal chat
-    thirdParticipants |> should equal ["author"]
+    thirdParticipants |> should equal [author]
     

@@ -1,6 +1,5 @@
 module RebootInBot.IntegrationTests.CancelTimerTest
 
-open System
 open System.Threading.Tasks
 open RebootInBot.Bot
 open RebootInBot.IntegrationTests.Mocks.MockMessenger
@@ -12,28 +11,28 @@ open FsUnit
 let ``Test cancel timer`` () =
     let sent = ResizeArray([])
     let updates = ResizeArray([])
-    let messageId = Guid.NewGuid()
+    let messageId = MessageId 29L
     let onUpdate chat messageId text =
         updates.Add (chat, messageId, text)
         Task.CompletedTask
     let onSend (chat, participants, text) =
         sent.Add (chat, participants, text)
         Task.FromResult(messageId)
-    let messenger = MockMessenger(onSend, onUpdate, ["author";"participant1";"participant2"])
-    let chat = { ChatId = Guid.NewGuid() }
-    let author = "author"
+    let messenger = MockMessenger(onSend, onUpdate, [ChatParticipant "author"; ChatParticipant "participant1"; ChatParticipant "participant2"])
+    let chat = { ChatId = ChatId 30L }
+    let author = ChatParticipant "author"
     let startTimerMessage: IncomingMessage =
         { Chat = chat
           Author = author
           Text = "text"
-          MessageId = Guid.NewGuid()
-          Commands = [ "/reboot" ] }
+          MessageId = MessageId 31L
+          Commands = [ BotCommand "/reboot" ] }
     let cancelTimerMessage: IncomingMessage =
         { Chat = chat
-          Author = "participant1"
+          Author = ChatParticipant "participant1"
           Text = "text"
-          MessageId = Guid.NewGuid()
-          Commands = [ "/cancel" ] }
+          MessageId = MessageId 32L
+          Commands = [ BotCommand "/cancel" ] }
         
     
     use bot = Bot.Start(messenger)
@@ -49,6 +48,6 @@ let ``Test cancel timer`` () =
     sent.Count |> should equal 3
     let (thirdChat, thirdParticipants, thirdText) = sent.[2]
     thirdChat |> should equal chat
-    thirdParticipants |> should equal ["author"]
+    thirdParticipants |> should equal [author]
     thirdText |> should equal "С перезапуском нужно подождать"
     

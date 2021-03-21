@@ -1,6 +1,5 @@
 module RebootInBot.Tests.CommandsTests
 
-open System
 open Xunit
 open FsUnit
 open RebootInBot.Types
@@ -8,14 +7,14 @@ open RebootInBot.Commands
 
 [<Fact>]
 let ``parseCommand should return StartTimer on /reboot command`` () =
-    let chat = { ChatId = Guid.NewGuid() }
-    let author = "author"
+    let chat = { ChatId = ChatId 24L }
+    let author = ChatParticipant "author"
     let message: IncomingMessage =
         { Chat = chat
           Author = author
           Text = "text"
-          MessageId = Guid.NewGuid()
-          Commands = [ "/reboot" ] }
+          MessageId = MessageId 52L
+          Commands = [ BotCommand "/reboot" ] }
     let expected =
         { Chat = chat
           Starter = author }
@@ -26,14 +25,14 @@ let ``parseCommand should return StartTimer on /reboot command`` () =
 
 [<Fact>]
 let ``parseCommand should return CancelTimer on /cancel command`` () =
-    let chat = { ChatId = Guid.NewGuid() }
-    let author = "author"
+    let chat = { ChatId = ChatId 53L }
+    let author = ChatParticipant "author"
     let message: IncomingMessage =
         { Chat = chat
           Author = author
           Text = "text"
-          MessageId = Guid.NewGuid()
-          Commands = [ "/cancel" ] }
+          MessageId = MessageId 20L
+          Commands = [ BotCommand "/cancel" ] }
     let expected =
         { Chat = chat  }
     
@@ -43,14 +42,14 @@ let ``parseCommand should return CancelTimer on /cancel command`` () =
 
 [<Fact>]    
 let ``parseCommand should return None on unknown command`` () =
-    let chat = { ChatId = Guid.NewGuid() }
-    let author = "author"
+    let chat = { ChatId = ChatId 596L }
+    let author = ChatParticipant "author"
     let message: IncomingMessage =
         { Chat = chat
           Author = author
           Text = "text"
-          MessageId = Guid.NewGuid()
-          Commands = [ "/unknown" ] }
+          MessageId = MessageId 88L
+          Commands = [ BotCommand "/unknown" ] }
     
     let actual = parseCommand message
     
