@@ -27,7 +27,9 @@ let countDown (sendMessage: SendMessage)
                     do! Async.Sleep config.Delay
                     do! updateMessage runningTimer.Chat messageId (sprintf "Перезапуск через %i" count)
                     do! doUpdates (count - 1) messageId
-                | _ -> ()
+                | _ ->
+                    do! (sendMessage runningTimer.Chat (Seq.singleton runningTimer.Starter) "Поехали!")
+                        |> Async.Ignore
             | _ -> ()
         }
 
@@ -42,9 +44,7 @@ let countDown (sendMessage: SendMessage)
                 })
 
         do! (doUpdates config.CountsNumber messageId)
-        let! _ = sendMessage runningTimer.Chat (Seq.singleton runningTimer.Starter) "Поехали!"
         let! stopResult = stopTimer runningTimer
-
         match stopResult with
         | Ok _ -> ()
         | Error _ -> failwith "Can't stop timer"
