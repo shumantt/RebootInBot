@@ -12,17 +12,19 @@ let updateArrived (bot:Bot) (updateContext:UpdateContext) =
         message.From
         |> Option.bind (fun u -> u.Username)
         |> Option.defaultValue String.Empty
+        |> ChatParticipant
+        
     let text (message: Funogram.Telegram.Types.Message) =
          message.Text
         |> Option.defaultValue String.Empty
     let chat (message: Funogram.Telegram.Types.Message) =
-        { ChatId = message.Chat.Id }
+        { ChatId = ChatId message.Chat.Id }
         
     let commands (message: Funogram.Telegram.Types.Message) (text:string) =
         message.Entities
         |> Option.defaultValue Seq.empty
         |> Seq.filter (fun x -> x.Type = "bot_command")
-        |> Seq.map (fun x -> text.[int32(x.Offset)..int32(x.Offset + x.Length - int64(1))])
+        |> Seq.map (fun x -> BotCommand text.[int32(x.Offset)..int32(x.Offset + x.Length - int64(1))])
     
     let getIncomingMessage =
         updateContext.Update.Message
@@ -31,7 +33,7 @@ let updateArrived (bot:Bot) (updateContext:UpdateContext) =
             { Author = author m
               Text = text
               Chat = chat m
-              MessageId = m.MessageId
+              MessageId = MessageId m.MessageId
               Commands = commands m text })
         
     match getIncomingMessage with
@@ -42,8 +44,9 @@ let updateArrived (bot:Bot) (updateContext:UpdateContext) =
 [<EntryPoint>]
 let main argv =
     let token = argv.[0]
-    use bot = Bot.Start(RebootInBot.Telegram.Messenger.Messenger(token))
+    let config = { defaultConfig with Token = token }
+    use bot = Bot.Start(RebootInBot.Telegram.Messenger.Messenger(config))
     let updateArrived = updateArrived bot
-    startBot { defaultConfig with Token = token } (updateArrived) None |> Async.RunSynchronously
+    startBot config (updateArrived) None |> Async.RunSynchronously
     printfn "Hello World from F#!"
     0 

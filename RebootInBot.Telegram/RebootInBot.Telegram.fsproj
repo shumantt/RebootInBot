@@ -6,6 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="TypeConverters.fs" />
         <Compile Include="Messenger.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>

@@ -24,7 +24,7 @@ let cancelTimerProcess: CancelTimerProcess =
     fun getTimer stopTimer cancelTimerCommand ->
         async {
             return!
-                getTimer (cancelTimerCommand.Chat |> toTimerId)
+                getTimer (cancelTimerCommand.Chat.ToTimerId())
                 |> mapAsync toRunning
                 |> bindAsyncResultAsync stopTimer 
                 |> mapAsyncResult (fun stoppedTimer -> { Timer = stoppedTimer.Timer

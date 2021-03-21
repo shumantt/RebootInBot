@@ -1,26 +1,22 @@
 namespace RebootInBot.Types
 
-open System
 open System.Collections.Generic
 open System.Threading.Tasks
 
 // BotProcessing
-type ChatId = int64
+type ChatId = ChatId of int64
 
 type Chat = {
     ChatId: ChatId
 }
 
-type MessageAuthor = unit
-type MessageText = string
-type MessageId = int64
-type Mention = unit
-type BotCommand = string
-type ChatParticipant = string
+type MessageId = MessageId of int64
+type BotCommand = BotCommand of string
+type ChatParticipant = ChatParticipant of string
 
 type Message = {
     Author: ChatParticipant
-    Text: MessageText
+    Text: string
     Chat: Chat
     MessageId: MessageId
     Commands: IEnumerable<BotCommand>
@@ -67,7 +63,7 @@ type ParseCommand = IncomingMessage -> Option<Command>
         
 type MessageProcess = IncomingMessage -> Async<unit>
 
-type TimerId = int64
+type TimerId = TimerId of string
 
 type TimerInfo = {
     Id: TimerId

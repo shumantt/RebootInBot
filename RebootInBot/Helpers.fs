@@ -60,7 +60,8 @@ let liftAsync x =
         return x
     }
 
-let toTimerId (chat:Chat) : TimerId =
-    chat.ChatId
+type Chat with
+    member x.ToTimerId(): TimerId =
+        TimerId (x.ChatId.ToString())
     
     

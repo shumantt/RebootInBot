@@ -82,7 +82,7 @@ let startTimerProcess: StartTimerProcess =
     fun getTimer startTimer startTimerCountDown startTimerCommand ->
         async {
             return!
-                getTimer (startTimerCommand.Chat |> toTimerId)
+                getTimer (startTimerCommand.Chat.ToTimerId())
                 |> mapAsync toInactive
                 |> bindAsyncResultAsync (startTimer startTimerCommand)
                 |> bindAsyncResult startTimerCountDown
