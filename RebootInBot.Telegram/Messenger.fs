@@ -8,7 +8,7 @@ open RebootInBot.Types
 open Funogram.Api
 
 let sendMessage (chat:Chat) mentions text accessToken =
-    let messsage = (mentions |> String.concat " ") + text
+    let messsage = (mentions |> Seq.map(fun x -> "@"+x) |> String.concat " ") + " " + text
     Api.sendMessage chat.ChatId messsage
     |> api {Bot.defaultConfig with Token = accessToken}
     
