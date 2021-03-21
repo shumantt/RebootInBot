@@ -8,6 +8,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RebootInBot.IntegrationTest
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RebootInBot.ConsoleBot", "RebootInBot.ConsoleBot\RebootInBot.ConsoleBot.csproj", "{E5DFF037-2454-4253-853E-62FF387BAB18}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RebootInBot.Telegram", "RebootInBot.Telegram\RebootInBot.Telegram.fsproj", "{55A73A78-E902-43C9-B1F1-23D4B1C31B09}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,6 +32,10 @@ Global
 		{E5DFF037-2454-4253-853E-62FF387BAB18}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E5DFF037-2454-4253-853E-62FF387BAB18}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E5DFF037-2454-4253-853E-62FF387BAB18}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55A73A78-E902-43C9-B1F1-23D4B1C31B09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55A73A78-E902-43C9-B1F1-23D4B1C31B09}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55A73A78-E902-43C9-B1F1-23D4B1C31B09}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55A73A78-E902-43C9-B1F1-23D4B1C31B09}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection

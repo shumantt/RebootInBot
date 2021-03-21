@@ -5,7 +5,7 @@ open System.Collections.Generic
 open System.Threading.Tasks
 
 // BotProcessing
-type ChatId = Guid
+type ChatId = int64
 
 type Chat = {
     ChatId: ChatId
@@ -13,7 +13,7 @@ type Chat = {
 
 type MessageAuthor = unit
 type MessageText = string
-type MessageId = Guid
+type MessageId = int64
 type Mention = unit
 type BotCommand = string
 type ChatParticipant = string
