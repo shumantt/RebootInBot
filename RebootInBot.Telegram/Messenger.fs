@@ -10,14 +10,14 @@ open Funogram.Api
 let sendMessage (chat:Chat) mentions text accessToken =
     let messsage = (mentions |> String.concat " ") + text
     Api.sendMessage chat.ChatId messsage
-    |> api accessToken
+    |> api {Bot.defaultConfig with Token = accessToken}
     
 let updateMessage (chat:Chat) messageId newText accessToken =
     let chatId =  Types.ChatId.Int chat.ChatId
     Api.editMessageTextBase (Some chatId) (Some messageId) None newText None None None
-    |> api accessToken
+    |> api {Bot.defaultConfig with Token = accessToken}
 
-type Messenger(token) =
+type Messenger(token:string) =
     interface IBotMessenger with
         member x.SendMessage chat mentions text =
             let send =

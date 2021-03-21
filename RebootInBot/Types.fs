@@ -67,7 +67,7 @@ type ParseCommand = IncomingMessage -> Option<Command>
         
 type MessageProcess = IncomingMessage -> Async<unit>
 
-type TimerId = Guid
+type TimerId = int64
 
 type TimerInfo = {
     Id: TimerId
