@@ -26,27 +26,16 @@ type Bot(messenger: IBotMessenger, storage: ITimerStorage, timerConfig: TimerCon
     let startTimerProcess = StartTimer.startTimerProcess storage.Get startTimer startTimerCountDown
 
     let processCommand command =
-        let getResult command =
-            async {
-                match command with
-                | StartTimerCommand startTimerCommand ->
-                    let! startResult = startTimerProcess startTimerCommand
-                    return CommandProcessResult.StartTimerProcessResult startResult
-                | CancelTimerCommand cancelTimerCommand ->
-                    let! cancelResult = cancelTimerProcess cancelTimerCommand
-                    return CommandProcessResult.CancelTimerProcessResult cancelResult
-            }
-
         async {
-            let! result = getResult command
-
-            match result with
-            | StartTimerProcessResult startTimerProcessResult ->
-                match startTimerProcessResult with
+            match command with
+            | StartTimerCommand startTimerCommand ->
+                let! startResult = startTimerProcess startTimerCommand
+                match startResult with
                 | Ok _ -> ()
                 | Error error -> do! StartTimer.processStartError messenger.SendMessageAsync error
-            | CancelTimerProcessResult cancelTimerProcessResult ->
-                match cancelTimerProcessResult with
+            | CancelTimerCommand cancelTimerCommand ->
+                let! cancelResult = cancelTimerProcess cancelTimerCommand
+                match cancelResult  with
                 | Ok timerCancelled -> do! CancelTimer.processTimerCancelled messenger.SendMessageAsync timerCancelled
                 | Error _ -> ()
         }
@@ -54,8 +43,8 @@ type Bot(messenger: IBotMessenger, storage: ITimerStorage, timerConfig: TimerCon
     let processMessage (message: IncomingMessage) =
         async {
             match Commands.parseCommand message with
-            | None -> ()
             | Some command -> do! processCommand command
+            | None -> ()
         }
 
     member this.ProcessMessage(message: IncomingMessage) = processMessage message |> Async.StartAsTask
