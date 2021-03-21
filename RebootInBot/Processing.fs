@@ -15,7 +15,8 @@ type LongRunningProcessor<'a> private (longRunningWorker: MailboxProcessor<WorkQ
         let agent = MailboxProcessor.Start((fun inbox -> async {
             let mutable longRunningJobs = 0
             let handleLongRunningWork work =
-                if longRunningJobs < longRunningLimit then
+                match longRunningJobs with
+                | n when n < longRunningLimit ->
                     longRunningJobs <- longRunningJobs + 1
                     Async.Start(async {
                         try 
@@ -25,8 +26,7 @@ type LongRunningProcessor<'a> private (longRunningWorker: MailboxProcessor<WorkQ
                         | _ -> onWorkFail work.WorkData
                     }, ?cancellationToken = cancellationToken)
                     work.ReplyChannel.Reply(Started)
-                else
-                    work.ReplyChannel.Reply(Throttled)
+                | _ -> work.ReplyChannel.Reply(Throttled)
             
             while true do
                 let! workItem = inbox.Receive()
@@ -39,7 +39,7 @@ type LongRunningProcessor<'a> private (longRunningWorker: MailboxProcessor<WorkQ
         new LongRunningProcessor<'a>(agent)
         
     static member Start<'a>(processWork, longRunningLimit, ?cancellationToken:CancellationToken) =
-        let onWorkFail (_:'a) = ()
+        let onWorkFail (_:'a) = () //todo
         LongRunningProcessor<'a>.Start(processWork, longRunningLimit, onWorkFail, ?cancellationToken = cancellationToken)
         
         
