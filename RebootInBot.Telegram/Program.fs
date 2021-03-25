@@ -43,10 +43,10 @@ let updateArrived (bot:Bot) (updateContext:UpdateContext) =
 
 [<EntryPoint>]
 let main argv =
-    let token = argv.[0]
+    let token = Environment.GetEnvironmentVariable "TOKEN"
     let config = { defaultConfig with Token = token }
     use bot = Bot.Start(RebootInBot.Telegram.Messenger.Messenger(config))
     let updateArrived = updateArrived bot
     startBot config (updateArrived) None |> Async.RunSynchronously
-    printfn "Hello World from F#!"
+    
     0 
