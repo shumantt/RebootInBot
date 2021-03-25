@@ -39,7 +39,7 @@ type LongRunningProcessor<'a> private (longRunningWorker: MailboxProcessor<WorkQ
         new LongRunningProcessor<'a>(agent)
         
     static member Start<'a>(processWork, longRunningLimit, ?cancellationToken:CancellationToken) =
-        let onWorkFail (_:'a) = () //todo
+        let onWorkFail (_:'a) = ()
         LongRunningProcessor<'a>.Start(processWork, longRunningLimit, onWorkFail, ?cancellationToken = cancellationToken)
         
         
