@@ -9,6 +9,7 @@
         <Compile Include="TypeConverters.fs" />
         <Compile Include="Messenger.fs" />
         <Compile Include="Program.fs" />
+        <Content Include="Dockerfile" />
     </ItemGroup>
 
     <ItemGroup>
