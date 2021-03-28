@@ -1,16 +1,14 @@
 name: deploy
 on: [push]
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '3.1.x'
-      - run: dotnet publish -c Release
-  test:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - run: dotnet test -c Release
+      - name: build
+        run: dotnet publish -c Release
+      - name: test
+        run: dotnet test -c Release
