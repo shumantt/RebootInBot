@@ -12,9 +12,9 @@ jobs:
         run: dotnet publish -c Release
       - name: archive artifacts
         run: |
-          tar -cvf rebootinbot.telegram.tar RebootInBot.Telegram/bin/Release/netcoreapp3.1/publish
-          tar -cvf rebootinbot.unittests.tar RebootInBot.UnitTests/bin/Release/netcoreapp3.1/publish
-          tar -cvf rebootinbot.intergationtests.tar RebootInBot.IntegrationTests/bin/Release/netcoreapp3.1/publish
+          tar -C bot -cvf rebootinbot.telegram.tar RebootInBot.Telegram/bin/Release/netcoreapp3.1/publish
+          tar -C unit-tests -cvf rebootinbot.unittests.tar RebootInBot.UnitTests/bin/Release/netcoreapp3.1/publish
+          tar -C integration-tests -cvf rebootinbot.intergationtests.tar RebootInBot.IntegrationTests/bin/Release/netcoreapp3.1/publish
       - name: upload bot
         uses: actions/upload-artifact@v2
         with:
@@ -39,9 +39,9 @@ jobs:
         with:
           name: unit-tests
       - name: unpack
-        run: tar -xvf rebootinbot.unittests.tar -C ./
+        run: tar -xvf rebootinbot.unittests.tar ./
       - name: run tests
-        run: dotnet test RebootInBot.UnitTests.dll 
+        run: dotnet test unit-tests/RebootInBot.UnitTests.dll 
   integration-test:
     needs: build
     runs-on: ubuntu-latest
@@ -53,4 +53,4 @@ jobs:
       - name: unpack
         run: tar -xvf rebootinbot.intergationtests.tar -C ./
       - name: run tests
-        run: dotnet test RebootInBot.IntegrationTests.dll
+        run: dotnet test integration-tests/RebootInBot.IntegrationTests.dll
