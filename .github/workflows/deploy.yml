@@ -1,7 +1,7 @@
 name: deploy
 on: [push]
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
@@ -10,5 +10,47 @@ jobs:
           dotnet-version: '3.1.x'
       - name: build
         run: dotnet publish -c Release
-      - name: test
-        run: dotnet test -c Release
+      - name: archive artifacts
+        run: |
+          tar -cvf rebootinbot.telegram.tar RebootInBot.Telegram/bin/Release/netcoreapp3.1/publish
+          tar -cvf rebootinbot.unittests.tar RebootInBot.UnitTests/bin/Release/netcoreapp3.1/publish
+          tar -cvf rebootinbot.intergationtests.tar RebootInBot.IntegrationTests/bin/Release/netcoreapp3.1/publish
+      - name: upload bot
+        uses: actions/upload-artifact@v2
+        with:
+          name: bot
+          path: rebootinbot.telegram.tar
+      - name: upload unit tests
+        uses: actions/upload-artifact@v2
+        with:
+          name: unit-tests
+          path: rebootinbot.unittests.tar
+      - name: upload integration tests
+        uses: actions/upload-artifact@v2
+        with:
+          name: integration-tests
+          path: rebootinbot.intergationtests.tar
+  unit-test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: download tests
+        uses: actions/download-artifact@v2
+        with:
+          name: unit-tests
+      - name: unpack
+        run: tar -xvf rebootinbot.unittests.tar -C ./
+      - name: run tests
+        run: dotnet test RebootInBot.UnitTests.dll 
+  integration-test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: download tests
+        uses: actions/download-artifact@v2
+        with:
+          name: integration-tests
+      - name: unpack
+        run: tar -xvf rebootinbot.intergationtests.tar -C ./
+      - name: run tests
+        run: dotnet test RebootInBot.IntegrationTests.dll
