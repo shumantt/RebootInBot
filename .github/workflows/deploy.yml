@@ -12,9 +12,9 @@ jobs:
         run: dotnet publish -c Release
       - name: archive artifacts
         run: |
-          tar -C RebootInBot.Telegram/bin/Release/netcoreapp3.1/publish -cvf .
-          tar -C RebootInBot.UnitTests/bin/Release/netcoreapp3.1/publish -cvf rebootinbot.unittests.tar .
-          tar -C RebootInBot.IntegrationTests/bin/Release/netcoreapp3.1/publish cvf rebootinbot.intergationtests.tar .
+          tar -cvf rebootinbot.telegram.tar -C RebootInBot.Telegram/bin/Release/netcoreapp3.1/publish .
+          tar -cvf rebootinbot.unittests.tar -C RebootInBot.UnitTests/bin/Release/netcoreapp3.1/publish .
+          tar -cvf rebootinbot.intergationtests.tar -C RebootInBot.IntegrationTests/bin/Release/netcoreapp3.1/publish .
       - name: upload bot
         uses: actions/upload-artifact@v2
         with:
