@@ -1,7 +1,7 @@
 module RebootInBot.Tests.CommandsTests
 
 open Xunit
-open FsUnit
+open FsUnit.Xunit
 open RebootInBot.Types
 open RebootInBot.Commands
 

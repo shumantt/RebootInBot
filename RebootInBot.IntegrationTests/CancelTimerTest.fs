@@ -5,7 +5,7 @@ open RebootInBot.Bot
 open RebootInBot.IntegrationTests.Mocks.MockMessenger
 open RebootInBot.Types
 open Xunit
-open FsUnit
+open FsUnit.Xunit
 
 [<Fact>]
 let ``Test cancel timer`` () =

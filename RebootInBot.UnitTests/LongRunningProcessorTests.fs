@@ -3,7 +3,7 @@ module RebootInBot.Tests.LongRunningProcessorTests
 open RebootInBot.Processing
 open RebootInBot.Types
 open Xunit
-open FsUnit
+open FsUnit.Xunit
 
 [<Fact>]
 let ``should throttle with limit 0`` () =

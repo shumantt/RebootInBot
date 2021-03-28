@@ -2,7 +2,7 @@ module RebootInBot.IntegrationTests.StartTimerTest
 
 open System.Threading.Tasks
 open Xunit
-open FsUnit
+open FsUnit.Xunit
 open RebootInBot.Types
 open RebootInBot.Bot
 open RebootInBot.IntegrationTests.Mocks.MockMessenger
@@ -41,13 +41,13 @@ let ``Test start timer`` () =
     
     let (firstChat, firstParticipants, _) = sent.[0]
     firstChat |> should equal chat
-    firstParticipants |> should equal [ChatParticipant "participant1"; ChatParticipant "participant2"]
+    Assert.Equal([ChatParticipant "participant1"; ChatParticipant "participant2"], firstParticipants)
     
     let (secondChat, secondParticipants, _) = sent.[0]
     secondChat |> should equal chat
-    secondParticipants |> should equal [ChatParticipant "participant1"; ChatParticipant "participant2"]
+    Assert.Equal([ChatParticipant "participant1"; ChatParticipant "participant2"], secondParticipants)
     
     let (thirdChat, thirdParticipants, _) = sent.[2]
     thirdChat |> should equal chat
-    thirdParticipants |> should equal [author]
+    Assert.Equal([author], thirdParticipants)
     
