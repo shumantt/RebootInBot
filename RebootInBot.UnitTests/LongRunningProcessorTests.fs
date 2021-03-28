@@ -39,7 +39,7 @@ let ``should throttle when over the limit`` () =
     actual |> should equal Throttled
     
 
-[<Fact>]
+[<Fact(Skip="todo")>]
 let ``should call onWorkFail if fails`` () =
     let mutable onFailedCalled = false
     let processWork _ = async { failwith "failed" }
