@@ -67,6 +67,7 @@ jobs:
           name: bot
       - name: unpack
         run: tar -xvf rebootinbot.telegram.tar ./
+      - run: ls -al
       - name: build docker image
         run: docker build -t rebootinbot.telegram:v1.0.${{ github.run_number }} -f Dockerfile . 
       - name: save image
