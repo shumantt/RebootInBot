@@ -1,4 +1,4 @@
-name: deploy
+name: bot.ci
 on:
   push:
     branches:
@@ -15,7 +15,7 @@ jobs:
         run: dotnet publish -c Release
       - name: archive artifacts
         run: |
-          tar -cvf rebootinbot.telegram.tar -C RebootInBot.Telegram/bin/Release/netcoreapp3.1/publish .
+          tar -cvf rebootinbot.telegram.tar -C RebootInBot.Telegram ./bin/Release/netcoreapp3.1/publish Dockerfile
           tar -cvf rebootinbot.unittests.tar -C RebootInBot.UnitTests/bin/Release/netcoreapp3.1/publish .
           tar -cvf rebootinbot.intergationtests.tar -C RebootInBot.IntegrationTests/bin/Release/netcoreapp3.1/publish .
       - name: upload bot
@@ -57,3 +57,18 @@ jobs:
         run: tar -xvf rebootinbot.intergationtests.tar -C ./
       - name: run tests
         run: dotnet test RebootInBot.IntegrationTests.dll
+  deploy:
+    needs: [unit-test, integration-test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: download bot
+        uses: actions/download-artifact@v2
+        with:
+          name: bot
+      - name: unpack
+        run: tar -xvf rebootinbot.telegram.tar ./
+      - name: build docker image
+        run: docker build -t rebootinbot.telegram:v1.0.${{ github.run_number }} -f Dockerfile . 
+      - name: save image
+        run: docker save -o rebootinbot.telegram.image.tar rebootinbot.telegram:v1.0.${{ github.run_number }}
+      - run: ls -al
