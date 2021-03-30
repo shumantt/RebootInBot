@@ -7,7 +7,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@main
       - uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '3.1.x'
@@ -67,9 +67,35 @@ jobs:
           name: bot
       - name: unpack
         run: tar -xvf rebootinbot.telegram.tar -C ./
-      - run: ls -al
       - name: build docker image
         run: docker build -t rebootinbot.telegram:v1.0.${{ github.run_number }} -f Dockerfile . 
       - name: save image
-        run: docker save -o rebootinbot.telegram.image.tar rebootinbot.telegram:v1.0.${{ github.run_number }}
-      - run: ls -al
+        run: docker image save -o rebootinbot.telegram.image.tar rebootinbot.telegram:v1.0.${{ github.run_number }}
+      - name: remove old image
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSHKEY }}
+          script: rm /home/shumantt/rebootinbot/*
+      - name: copy image to vm
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSHKEY }}
+          source: rebootinbot.telegram.image.tar
+          target: /home/shumantt/rebootinbot/
+      - name: load and start docker
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSHKEY }}
+          script: |
+            docker load -i /home/shumantt/rebootinbot/rebootinbot.telegram.image.tar
+            docker tag rebootinbot.telegram:latest rebootinbot.telegram:v1.0.${{ github.run_number }}
+            docker image rm rebootinbot.telegram:latest
+            docker stop rebootinbot.telegram
+            docker run -d --rm --name rebootinbot.telegram -e TOKEN=${{ secrets.BOT_TOKEN }} rebootinbot.telegram:v1.0.${{ github.run_number }}
+            docker image prune -af
