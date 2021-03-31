@@ -5,5 +5,7 @@ Available messengers:
 - Telegram
 
 Commands:
+
 `/reboot` - start count down
+
 `/cancel` - stop count down and ask starter to wait a bit
