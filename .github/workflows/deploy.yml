@@ -92,10 +92,9 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSHKEY }}
+          script_stop: true
           script: |
             docker load -i /home/shumantt/rebootinbot/rebootinbot.telegram.image.tar
-            docker tag rebootinbot.telegram:latest rebootinbot.telegram:v1.0.${{ github.run_number }}
-            docker image rm rebootinbot.telegram:latest
             docker stop rebootinbot.telegram
             docker run -d --rm --name rebootinbot.telegram -e TOKEN=${{ secrets.BOT_TOKEN }} rebootinbot.telegram:v1.0.${{ github.run_number }}
             docker image prune -af
