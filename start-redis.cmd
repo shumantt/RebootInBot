@@ -1,1 +1,0 @@
-docker run --name bot-redis -p 6379:6379 -d redis
