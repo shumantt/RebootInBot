@@ -95,6 +95,6 @@ jobs:
           script_stop: true
           script: |
             docker load -i /home/shumantt/rebootinbot/rebootinbot.telegram.image.tar
-            docker stop rebootinbot.telegram
+            docker stop rebootinbot.telegram || echo "container not stopped"
             docker run -d --rm --name rebootinbot.telegram -e TOKEN=${{ secrets.BOT_TOKEN }} rebootinbot.telegram:v1.0.${{ github.run_number }}
             docker image prune -af
