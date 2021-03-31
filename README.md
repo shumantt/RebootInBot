@@ -1,6 +1,7 @@
 ![Deploy](https://github.com/shumantt/RebootInBot/actions/workflows/deploy.yml/badge.svg)
 
 Chat bot to inform members that you are going to reboot a machine.
+
 Available messengers:
 - Telegram
 
